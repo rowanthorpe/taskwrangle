@@ -19,10 +19,13 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='/usr/bin/picolisp /usr/lib/picolisp/lib.l -"load \"__LIBDIR__/libpicotask.l\" \"__CONFDIR__/picotask.l\"" -main "$@"'
+cmdline='/usr/bin/picolisp /usr/lib/picolisp/lib.l -"load \"__LIBDIR__/libpicotask.l\" \"__CONFDIR__/picotask.l\"" -main'
 
-if tty -s; then
-    eval "exec $cmdline +"
+if test $# -ne 0; then
+    eval "exec $cmdline -\"$*\" -bye"
+##TODO: not yet working (why?)
+#elif ! tty -s; then
+#    eval "exec $cmdline -\"in NIL (run (till NIL T))\" -bye"
 else
-    eval "exec $cmdline"
+    eval "exec $cmdline +"
 fi

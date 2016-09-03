@@ -6,5 +6,5 @@ TODO:
    - in (task-add) don't add items to blocks/blockedby/parent/children unless type == '(+Task)
    - check things are set/compared appropriately as transient-syms "XX" instead of intern-syms 'XX
  * add worklog/history (and ability to view timeline of changes)
- * handle running as commandline tool (args and flags)
+ * add "STDIN-handling" to commandline mode (presently interactive or cmdline args only)
  * copy/adapt web frontend logic from demo addressbook app on wiki
