@@ -1,0 +1,9 @@
+##TODO:
+# * add a trickle-down-flag "sortby" for ordering task-all, task-show, task-print results
+# * add a trickle-down-flag "display" for showing selected fields only for task-all, task-show, task-print results
+# * add constraints/error-checks e.g.
+#   - in (task-add) don't add items to blocks/blockedby/parent/children unless type == '(+Task)
+#   - check things are set/compared appropriately as transient-syms "XX" instead of intern-syms 'XX
+# * add worklog/history (and ability to view timeline of changes)
+# * handle running as commandline tool (args and flags)
+# * copy/adapt web frontend logic from demo addressbook app on wiki

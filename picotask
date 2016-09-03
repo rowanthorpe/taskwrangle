@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/bin/picolisp /usr/lib/picolisp/lib.l -"load \"/usr/local/lib/libpicotask.l\" \"/etc/picotask.l\"" -main "$@" +
