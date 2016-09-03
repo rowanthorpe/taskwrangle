@@ -138,7 +138,7 @@
 (de task-print @
    (mapcar println (pass task-show))
    NIL )
-    
+
 ## Help output
 ## Usage: (task-help)
 (de task-help ()
