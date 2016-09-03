@@ -111,11 +111,10 @@ else
         s:__DOCDIR__:${_docdir}:g
         s:__PREFIX__:${_prefix}:g
     "
-    mkdir -vp "$_confdir" "$_libdir" "$_execdir" "$_docdir"
-    cp -fv "${_thisdir}/COPYING" "${_docdir}/COPYING"
-    cp -fv "${_thisdir}/README.md" "${_docdir}/README.md"
-    cp -fv "${_thisdir}/TODO" "${_docdir}/TODO"
+    mkdir -vp "$_execdir" "$_libdir" "$_confdir"
+    install -v -D -m u=rw,go=r -t "$_docdir" "${_thisdir}/COPYING" "${_thisdir}/README.md" "${_thisdir}/TODO"
     sed -e "$_sed_string" "${_thisdir}/picotask" >"${_execdir}/picotask"
+    chmod +x "${_execdir}/picotask"
     printf 'copied "%s" to "%s"\n' "${_thisdir}/picotask" "${_execdir}/picotask" >&2
     sed -e "$_sed_string" "${_thisdir}/lib/libpicotask.l" >"${_libdir}/libpicotask.l"
     printf 'copied "%s" to "%s"\n' "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l" >&2
