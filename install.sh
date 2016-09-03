@@ -34,17 +34,19 @@ case "$1" in
 esac
 
 if test 1 -eq $_uninstall; then
-    rm -fv "/usr/local/share/doc/picotask/README.md"
-    rm -fv "/usr/local/share/doc/picotask/TODO"
     rm -fv "/etc/picotask.l"
     rm -fv "/usr/local/lib/libpicotask.l"
     rm -fv "/usr/local/bin/picotask"
-    rmdir /usr/local/share/doc/picotask </dev/null >/dev/null 2>&1 || :
+    rm -fv "/usr/local/share/doc/picotask/TODO"
+    rm -fv "/usr/local/share/doc/picotask/README.md"
+    rm -fv "/usr/local/share/doc/picotask/COPYING"
+    rmdir /usr/local/share/doc/picotask
 else
     mkdir -p /etc /usr/local/lib /usr/local/bin /usr/local/share/doc/picotask
+    cp -fv "${_thisdir}/COPYING" "/usr/local/share/doc/picotask/COPYING"
     cp -fv "${_thisdir}/README.md" "/usr/local/share/doc/picotask/README.md"
     cp -fv "${_thisdir}/TODO" "/usr/local/share/doc/picotask/TODO"
-    cp -fv "${_thisdir}/conf/picotask.l" "/etc/picotask.l"
-    cp -fv "${_thisdir}/lib/libpicotask.l" "/usr/local/lib/libpicotask.l"
     cp -fv "${_thisdir}/picotask" "/usr/local/bin/picotask"
+    cp -fv "${_thisdir}/lib/libpicotask.l" "/usr/local/lib/libpicotask.l"
+    cp -fv "${_thisdir}/conf/picotask.l" "/etc/picotask.l"
 fi

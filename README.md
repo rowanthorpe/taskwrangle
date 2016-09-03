@@ -4,12 +4,19 @@ Picotask
 Copyright/License
 -----------------
 
-Copyright © 2016 Rowan Thorpe. Initially based entirely on a "taskdb" demo-app
+Copyright © 2016 Rowan Thorpe. Initially based entirely on a `taskdb` demo-app
 posted by Joe Bognor at [the Picolisp wiki](http://picolisp.com/wiki/?taskdb) on 24 August 2016, and
 intended to develop extensively from there.
 
 Picotask is distributed under the terms of the [GNU Affero General Public
 License](https://www.gnu.org/licenses/agpl-3.0.html) version 3 or greater.
+
+Installation
+------------
+
+Copy `conf/picotask.l.template` to `conf/picotask.l` and edit the copied file to
+suit your needs, then run `install.sh`. To customise installed locations edit
+`install.sh` first.
 
 Rationale
 ---------
