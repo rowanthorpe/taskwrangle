@@ -34,6 +34,19 @@ _docdir=''
 
 while test 0 -ne $#; do
     case "$1" in
+        -h|--help)
+            cat <<EOF
+Usage: $_thisbase [-u|-p|-c|-l|-e|-d]
+
+ -u    : uninstall         (default: install)
+ -p XX : set prefix to XX  (default: /usr/local)
+ -c XX : set confdir to XX (default: /usr/local/etc)
+ -l XX : set libdir to XX  (default: /usr/local/lib)
+ -e XX : set execdir to XX (default: /usr/local/bin)
+ -d XX : set docdir to XX  (default: /usr/local/share/doc/picotask)
+EOF
+            exit 0
+            ;;
         -u)
             _uninstall=1
             shift
