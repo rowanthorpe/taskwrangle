@@ -26,27 +26,86 @@ _thisdir="$(dirname "$_this")"
 _thisbase="$(basename "$_this")"
 
 _uninstall=0
-case "$1" in
-    -u)
-        _uninstall=1
-        shift
-        ;;
-esac
+_prefix='/usr/local'
+_confdir=''
+_libdir=''
+_execdir=''
+_docdir=''
+
+while test 0 -ne $#; do
+    case "$1" in
+        -u)
+            _uninstall=1
+            shift
+            ;;
+        -p)
+            _prefix="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        -c)
+            _confdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        -l)
+            _libdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        -e)
+            _execdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        -d)
+            _docdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            printf 'Unknown arg "%s"\n' "$1" >&2
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+if test -z "$_confdir"; then
+    if test '/usr' = "$_prefix"; then
+        _confdir='/etc'
+    else
+        _confdir="${_prefix}/etc"
+    fi
+fi
+test -n "$_libdir" || _libdir="${_prefix}/lib"
+test -n "$_execdir" || _execdir="${_prefix}/bin"
+test -n "$_docdir" || _docdir="${_prefix}/share/doc/picotask"
 
 if test 1 -eq $_uninstall; then
-    rm -fv "/etc/picotask.l"
-    rm -fv "/usr/local/lib/libpicotask.l"
-    rm -fv "/usr/local/bin/picotask"
-    rm -fv "/usr/local/share/doc/picotask/TODO"
-    rm -fv "/usr/local/share/doc/picotask/README.md"
-    rm -fv "/usr/local/share/doc/picotask/COPYING"
-    rmdir /usr/local/share/doc/picotask
+    rm -fv "${_confdir}/picotask.l"
+    rm -fv "${_libdir}/libpicotask.l"
+    rm -fv "${_execdir}/picotask"
+    rm -fv "${_docdir}/TODO"
+    rm -fv "${_docdir}/README.md"
+    rm -fv "${_docdir}/COPYING"
+    rmdir -v "$_docdir"
 else
-    mkdir -p /etc /usr/local/lib /usr/local/bin /usr/local/share/doc/picotask
-    cp -fv "${_thisdir}/COPYING" "/usr/local/share/doc/picotask/COPYING"
-    cp -fv "${_thisdir}/README.md" "/usr/local/share/doc/picotask/README.md"
-    cp -fv "${_thisdir}/TODO" "/usr/local/share/doc/picotask/TODO"
-    cp -fv "${_thisdir}/picotask" "/usr/local/bin/picotask"
-    cp -fv "${_thisdir}/lib/libpicotask.l" "/usr/local/lib/libpicotask.l"
-    cp -fv "${_thisdir}/conf/picotask.l" "/etc/picotask.l"
+    _sed_string="
+        s:__CONFDIR__:${_confdir}:g
+        s:__LIBDIR__:${_libdir}:g
+        s:__EXECDIR__:${_execdir}:g
+        s:__DOCDIR__:${_docdir}:g
+        s:__PREFIX__:${_prefix}:g
+    "
+    mkdir -vp "$_confdir" "$_libdir" "$_execdir" "$_docdir"
+    cp -fv "${_thisdir}/COPYING" "${_docdir}/COPYING"
+    cp -fv "${_thisdir}/README.md" "${_docdir}/README.md"
+    cp -fv "${_thisdir}/TODO" "${_docdir}/TODO"
+    sed -e "$_sed_string" "${_thisdir}/picotask" >"${_execdir}/picotask"
+    printf 'copied "%s" to "%s"\n' "${_thisdir}/picotask" "${_execdir}/picotask" >&2
+    sed -e "$_sed_string" "${_thisdir}/lib/libpicotask.l" >"${_libdir}/libpicotask.l"
+    printf 'copied "%s" to "%s"\n' "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l" >&2
+    sed -e "$_sed_string" "${_thisdir}/conf/picotask.l" >"${_confdir}/picotask.l"
+    printf 'copied "%s" to "%s"\n' "${_thisdir}/conf/picotask.l" "${_confdir}/picotask.l" >&2
 fi
