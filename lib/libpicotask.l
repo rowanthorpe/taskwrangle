@@ -169,6 +169,45 @@
    (prinl "(task-block Number BNumber)")
    (prinl "(task-unblock Number BNumber)")
    (prinl "(task-help)")
+   (prinl "(task-license)")
+   (prinl "(task-source)")
+   NIL )
+
+## License/Copyright output
+## Usage: (task-license)
+(de task-license ()
+   (prinl "Picotask
+
+Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
+posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
+intended to develop extensively from there.
+
+Picotask is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Picotask is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
+   NIL )
+
+## Source output (AGPL compliance)
+## Usage: (task-source)
+(de task-source ()
+   (prinl "****** picotask executable")
+   (prinl)
+   (in "/usr/local/bin/picotask" (prinl (till NIL T)))
+   (prinl "****** picotask config")
+   (prinl)
+   (in "/etc/picotask.l" (prinl (till NIL T)))
+   (prinl "****** libpicolisp.l")
+   (prinl)
+   (in "/usr/local/lib/libpicotask.l" (prinl (till NIL T)))
    NIL )
 
 ## CORE PUBLIC CONVENIENCE FUNCTIONS

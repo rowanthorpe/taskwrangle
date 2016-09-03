@@ -1,4 +1,4 @@
-## TODO:
+TODO:
 
  * add a trickle-down-flag "sortby" for ordering task-all, task-show, task-print results
  * add a trickle-down-flag "display" for showing selected fields only for task-all, task-show, task-print results
