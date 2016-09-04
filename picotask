@@ -19,14 +19,14 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='__PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -"load \"__CONFDIR__/picotask.l\" \"__LIBDIR__/libpicotask.l\"" -"ptask~connectdb"'
+cmdline='__PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -"load \"__CONFDIR__/picotask.l\" \"__LIBDIR__/libpicotask.l\"" -"symbols '\''picotask" -"connectdb"'
 
 case "$1" in
     -h|--help)
         cat <<EOF
 Usage: $(printf '%s' "$0" | sed -e 's:^.*/\([^/]\+\)$:\1:') [ARGS]
 
-Picolisp task-manager. With no args, runs interactively. Enter (ptask~help) in
+Picolisp task-manager. With no args, runs interactively. Enter (help) in
 the prompt for info. Enter (bye) to exit.
 
 ARGS:
@@ -34,11 +34,11 @@ ARGS:
  enclosing parentheses (like what is used for normal noninteractive use of
  picolisp). For example:
 
-  picotask 'ptask~help'
+  picotask 'help'
 
  executes as:
 
-  ${cmdline} -'ptask~help' -bye
+  ${cmdline} -'help' -bye
 
 EOF
         exit 0
