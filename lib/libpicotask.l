@@ -38,6 +38,11 @@
       (with Item (: number))
       Item ) )
 
+(de get-or-set (Number Field Val)
+   (if Val
+      (modify T Number Field Val)
+      (get (db 'number '+Task Number) Field) ) )
+
 #### CORE PUBLIC FUNCTIONS
 
 # Adds a task. Uses default priority of 1000 if not specified
@@ -216,7 +221,7 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
 #### PUBLIC WRAPPER FUNCTIONS
 
 (de status (Number Status)
-   (modify T Number 'status Status) )
+   (get-or-set Number 'status Status) )
 
 (de setdone (Number)
    (status Number "DONE") )
@@ -225,43 +230,43 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
    (status Number "OPEN") )
 
 (de rename (Number Name)
-   (modify T Number 'name Name) )
+   (get-or-set Number 'name Name) )
 
 (de priority (Number Priority)
-   (modify T Number 'priority Priority) )
+   (get-or-set Number 'priority Priority) )
 
 (de tag (Number Tag)
-   (modify T Number 'tags Tag) )
+   (get-or-set Number 'tags Tag) )
 
 (de untag (Number Tag)
    (modify NIL Number 'tags Tag) )
 
 (de comment (Number Comment)
-   (modify T Number 'comment Comment) )
+   (get-or-set Number 'comment Comment) )
 
 (de uncomment (Number)
    (modify NIL Number 'comment) )
 
 (de due (Number Due)
-   (modify T Number 'due Due) )
+   (get-or-set Number 'due Due) )
 
 (de undue (Number)
    (modify NIL Number 'due) )
 
 (de parent (Number PNumber)
-   (modify T Number 'parent PNumber) )
+   (get-or-set Number 'parent PNumber) )
 
 (de unparent (Number)
    (modify NIL Number 'parent) )
 
 (de child (Number CNumber)
-   (modify T Number 'children CNumber) )
+   (get-or-set Number 'children CNumber) )
 
 (de unchild (Number CNumber)
    (modify NIL Number 'children CNumber) )
 
 (de block (Number BNumber)
-   (modify T Number 'blocks BNumber) )
+   (get-or-set Number 'blocks BNumber) )
 
 (de unblock (Number BNumber)
    (modify NIL Number 'blocks BNumber) )
