@@ -21,7 +21,7 @@
 
 #### INTERNAL FUNCTIONS
 
-(symbols 'task 'pico)
+(symbols 'ptask 'pico)
 
 (de error (Error)
     (prinl (pack "ERROR: " Error))
