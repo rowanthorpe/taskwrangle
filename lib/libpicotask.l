@@ -268,12 +268,6 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
 (de connect-db ()
    (pool *TaskDBFile) ) ## initial database (consider block size)
 
-(de main ()
-   (connect-db) )
-   #(when [run as commandline tool]
-   #   (...parse argv, execute functions...)
-   #   (bye) )
-
 #(de webserve ()
 #   (connect-db)
 #   (server 8081 "!work") )

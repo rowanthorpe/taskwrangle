@@ -21,29 +21,39 @@
 
 set -e
 
-_this="$(readlink -e "$0")"
-_thisdir="$(dirname "$_this")"
-_thisbase="$(basename "$_this")"
+_this="$(readlink -e "${0}")"
+_thisdir="$(dirname "${_this}")"
+_thisbase="$(basename "${_this}")"
 
 _uninstall=0
 _prefix='/usr/local'
+_pl_prefix='/usr'
 _confdir=''
 _libdir=''
 _execdir=''
 _docdir=''
 
-while test 0 -ne $#; do
-    case "$1" in
+_derive_conf_dir() {
+    if test '/usr' = "${_prefix}"; then
+        printf '/etc'
+    else
+        printf '%s' "${_prefix}/etc"
+    fi
+}
+
+while test 0 -ne ${#}; do
+    case "${1}" in
         -h|--help)
             cat <<EOF
-Usage: $_thisbase [-u|-p|-c|-l|-e|-d]
+Usage: ${_thisbase} [-u|-p|-c|-l|-e|-d]
 
- -u    : uninstall         (default: install)
- -p XX : set prefix to XX  (default: /usr/local)
- -c XX : set confdir to XX (default: /usr/local/etc)
- -l XX : set libdir to XX  (default: /usr/local/lib)
- -e XX : set execdir to XX (default: /usr/local/bin)
- -d XX : set docdir to XX  (default: /usr/local/share/doc/picotask)
+ -u    : uninstall                 (default: install)
+ -p XX : set prefix to XX          (default: ${_prefix})
+ -c XX : set confdir to XX         (default: ${_confdir:-$(_derive_conf_dir)})
+ -l XX : set libdir to XX          (default: ${_libdir:-${_prefix}}/lib)
+ -e XX : set execdir to XX         (default: ${_execdir:-${_prefix}}/bin)
+ -d XX : set docdir to XX          (default: ${_docdir:-${_prefix}}/share/doc/picotask)
+ -P XX : set picolisp prefix to XX (default: ${_pl_prefix})
 EOF
             exit 0
             ;;
@@ -52,23 +62,27 @@ EOF
             shift
             ;;
         -p)
-            _prefix="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            _prefix="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
             shift 2
             ;;
         -c)
-            _confdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            _confdir="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
             shift 2
             ;;
         -l)
-            _libdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            _libdir="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
             shift 2
             ;;
         -e)
-            _execdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            _execdir="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
             shift 2
             ;;
         -d)
-            _docdir="$(printf '%s\n' "$2" | sed -r -e '$ s:/+$::')"
+            _docdir="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
+            shift 2
+            ;;
+        -P)
+            _pl_prefix="$(printf '%s\n' "${2}" | sed -r -e '$ s:/+$::')"
             shift 2
             ;;
         --)
@@ -76,7 +90,7 @@ EOF
             break
             ;;
         -*)
-            printf 'Unknown arg "%s"\n' "$1" >&2
+            printf 'Unknown arg "%s"\n' "${1}" >&2
             exit 1
             ;;
         *)
@@ -84,25 +98,19 @@ EOF
             ;;
     esac
 done
-if test -z "$_confdir"; then
-    if test '/usr' = "$_prefix"; then
-        _confdir='/etc'
-    else
-        _confdir="${_prefix}/etc"
-    fi
-fi
-test -n "$_libdir" || _libdir="${_prefix}/lib"
-test -n "$_execdir" || _execdir="${_prefix}/bin"
-test -n "$_docdir" || _docdir="${_prefix}/share/doc/picotask"
+test -n "${_confdir}" || _confdir="$(_derive_conf_dir)"
+test -n "${_libdir}" || _libdir="${_prefix}/lib"
+test -n "${_execdir}" || _execdir="${_prefix}/bin"
+test -n "${_docdir}" || _docdir="${_prefix}/share/doc/picotask"
 
-if test 1 -eq $_uninstall; then
+if test 1 -eq ${_uninstall}; then
     rm -fv "${_confdir}/picotask.l"
     rm -fv "${_libdir}/libpicotask.l"
     rm -fv "${_execdir}/picotask"
     rm -fv "${_docdir}/TODO"
     rm -fv "${_docdir}/README.md"
     rm -fv "${_docdir}/COPYING"
-    rmdir -v "$_docdir"
+    rmdir -v "${_docdir}"
 else
     _sed_string="
         s:__CONFDIR__:${_confdir}:g
@@ -110,14 +118,15 @@ else
         s:__EXECDIR__:${_execdir}:g
         s:__DOCDIR__:${_docdir}:g
         s:__PREFIX__:${_prefix}:g
+        s:__PL_PREFIX__:${_pl_prefix}:g
     "
-    mkdir -vp "$_execdir" "$_libdir" "$_confdir"
-    install -v -D -m u=rw,go=r -t "$_docdir" "${_thisdir}/COPYING" "${_thisdir}/README.md" "${_thisdir}/TODO"
-    sed -e "$_sed_string" "${_thisdir}/picotask" >"${_execdir}/picotask"
+    mkdir -vp "${_execdir}" "${_libdir}" "${_confdir}"
+    install -v -D -m u=rw,go=r -t "${_docdir}" "${_thisdir}/COPYING" "${_thisdir}/README.md" "${_thisdir}/TODO"
+    sed -e "${_sed_string}" "${_thisdir}/picotask" >"${_execdir}/picotask"
     chmod +x "${_execdir}/picotask"
     printf 'copied "%s" to "%s"\n' "${_thisdir}/picotask" "${_execdir}/picotask" >&2
-    sed -e "$_sed_string" "${_thisdir}/lib/libpicotask.l" >"${_libdir}/libpicotask.l"
+    sed -e "${_sed_string}" "${_thisdir}/lib/libpicotask.l" >"${_libdir}/libpicotask.l"
     printf 'copied "%s" to "%s"\n' "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l" >&2
-    sed -e "$_sed_string" "${_thisdir}/conf/picotask.l" >"${_confdir}/picotask.l"
+    sed -e "${_sed_string}" "${_thisdir}/conf/picotask.l" >"${_confdir}/picotask.l"
     printf 'copied "%s" to "%s"\n' "${_thisdir}/conf/picotask.l" "${_confdir}/picotask.l" >&2
 fi

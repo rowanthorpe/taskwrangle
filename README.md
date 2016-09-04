@@ -23,7 +23,7 @@ Rationale
 ---------
 
 I was frustrated by various task-management systems I gave up on over the years
-(mainly due to them being over-engineered for my needs, and never having the
+(mainly due to them being over-engineered for my needs, and my never having the
 time to become a "task-management guru" just to have a hierarchical TODO
 system). From those experiences and some good takeaways from working with
 trouble-ticket and project-management systems over the years, I know very much

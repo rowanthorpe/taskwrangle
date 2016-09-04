@@ -19,10 +19,37 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='/usr/bin/picolisp /usr/lib/picolisp/lib.l -"load \"__LIBDIR__/libpicotask.l\" \"__CONFDIR__/picotask.l\"" -main'
+cmdline='__PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -"load \"__LIBDIR__/libpicotask.l\" \"__CONFDIR__/picotask.l\"" -connect-db'
+
+case "$1" in
+    -h|--help)
+        cat <<EOF
+Usage: $(printf '%s' "$0" | sed -e 's:^.*/\([^/]\+\)$:\1:') [ARGS]
+
+Picolisp task-manager. With no args, runs interactively. Enter (task-help) in
+the prompt for info. Enter (bye) to exit.
+
+ARGS:
+ Forces non-interactive use. Enter shell-escaped picolisp commands without
+ enclosing parentheses (like what is used for normal noninteractive use of
+ picolisp). For example:
+
+  picotask 'task-help'
+
+ executes as:
+
+  ${cmdline} -'task-help' -bye
+
+EOF
+        exit 0
+        ;;
+esac
 
 if test $# -ne 0; then
-    eval "exec $cmdline -\"$*\" -bye"
+    for _arg do
+        cmdline="${cmdline} -'$(printf '%s' "${_arg}" | sed -r -e "s/'/'\\\\''/g")'"
+    done
+    eval "exec $cmdline -bye"
 ##TODO: not yet working (why?)
 #elif ! tty -s; then
 #    eval "exec $cmdline -\"in NIL (run (till NIL T))\" -bye"
