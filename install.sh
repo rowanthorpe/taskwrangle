@@ -120,13 +120,24 @@ else
         s:__PREFIX__:${_prefix}:g
         s:__PL_PREFIX__:${_pl_prefix}:g
     "
-    mkdir -vp "${_execdir}" "${_libdir}" "${_confdir}"
+    _install_sed() {
+        _srcpath="${1}"
+        _dstpath="${2}"
+        _chmod="${3:-u=rw,go=r}"
+        shift 2
+        _tmppath="$(mktemp)"
+        _exists=0
+        test -e "${_dstpath}" || _exists=1
+        sed -e "${_sed_string}" "${_srcpath}" >"${_tmppath}"
+        mkdir -p "$(dirname "${_dstpath}")"
+        mv -f "${_tmppath}" "${_dstpath}"
+        test 1 -eq $_exists || printf 'removed '\''%s'\''\n' "${_dstpath}"
+        printf ''\''%s'\'' -> '\''%s'\''\n' "${_srcpath}" "${_dstpath}" >&2
+        rm -f "${_tmppath}"
+        chmod "${_chmod}" "${_dstpath}"
+    }
     install -v -D -m u=rw,go=r -t "${_docdir}" "${_thisdir}/COPYING" "${_thisdir}/README.md" "${_thisdir}/TODO"
-    sed -e "${_sed_string}" "${_thisdir}/picotask" >"${_execdir}/picotask"
-    chmod +x "${_execdir}/picotask"
-    printf 'copied "%s" to "%s"\n' "${_thisdir}/picotask" "${_execdir}/picotask" >&2
-    sed -e "${_sed_string}" "${_thisdir}/lib/libpicotask.l" >"${_libdir}/libpicotask.l"
-    printf 'copied "%s" to "%s"\n' "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l" >&2
-    sed -e "${_sed_string}" "${_thisdir}/conf/picotask.l" >"${_confdir}/picotask.l"
-    printf 'copied "%s" to "%s"\n' "${_thisdir}/conf/picotask.l" "${_confdir}/picotask.l" >&2
+    _install_sed "${_thisdir}/picotask" "${_execdir}/picotask" 'u=rwx,go=rx'
+    _install_sed "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l"
+    _install_sed "${_thisdir}/conf/picotask.l" "${_confdir}/picotask.l"
 fi
