@@ -17,30 +17,32 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-(load "@lib/misc.l" "@lib/btree.l" "@lib/db.l") # "@lib/pilog.l" "@lib/debug.l"
+(load "@lib/misc.l" "@lib/btree.l") # "@lib/db.l" "@lib/pilog.l" "@lib/debug.l"
 
-## INTERNAL FUNCTIONS
+#### INTERNAL FUNCTIONS
 
-(de task-error (Error)
+(symbols 'task 'pico)
+
+(de error (Error)
     (prinl (pack "ERROR: " Error))
     NIL )
 
-(de task-known-status (Status)
+(de known-status (Status)
    (case Status
       # "NEW" status can never be manually set, only by creating the task
       (("OPEN" "DONE" "ACTION" "WAITFOR" "DELEGATED") T)
-      (T (task-error "Status is not one of OPEN, DONE, ACTION, WAITFOR, DELEGATED")) ) )
+      (T (error "Status is not one of OPEN, DONE, ACTION, WAITFOR, DELEGATED")) ) )
 
-(de task-val-or-tasknum (Item)
+(de val-or-tasknum (Item)
    (if (= (type Item) '(+Task))
       (with Item (: number))
       Item ) )
 
-## CORE PUBLIC FUNCTIONS
+#### CORE PUBLIC FUNCTIONS
 
 # Adds a task. Uses default priority of 1000 if not specified
-# Usage: (task-add "call home")
-(de task-add (Taskname Priority Due Parent Children Blocks Blockedby Tags Comment)
+# Usage: (add "call home")
+(de add (Taskname Priority Due Parent Children Blocks Blockedby Tags Comment)
    (when Taskname
       (new! '(+Task)
          'number (genKey 'number '+Task)
@@ -55,20 +57,20 @@
          'tags Tags
          'comment Comment ) ) )
 
-# Deletes a task
-# Usage: (task-delete 1)
-(de task-delete (Number)
+# Destroys a task
+# Usage: (destroy 1)
+(de destroy (Number)
    (lose!> (db 'number '+Task Number)) )
 
-# Edits a task (first arg =T to add/set, =NIL to remove/clear)
-# Usage: (task-edit T 2 'status "WAITFOR"), (task-edit NIL 1 'blocks 3), etc
-(de task-edit (Set Number . @)
+# Modifies a task (first arg =T to add/set, =NIL to remove/clear)
+# Usage: (modify T 2 'status "WAITFOR"), (modify NIL 1 'blocks 3), etc
+(de modify (Set Number . @)
    (if Set
       (case (arg 1)
-         ("status" (when (task-known-status (arg 2)) (put!> (db 'number '+Task Number) (arg 1) (arg 2))))
+         ("status" (when (known-status (arg 2)) (put!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (("name" "priority" "comment") (put!> (db 'number '+Task Number) (arg 1) (arg 2)))
          ("tags" (put!> (db 'number '+Task Number) (arg 1) (if (lst? (arg 2)) (append (get (db 'number '+Task Number) (arg 1)) (arg 2)) (arg 2))))
-         ("due" (let (Date ($dat (arg 2) *DateSep)) (if (= NIL Date) (task-error "Unrecognised due-date format") (put!> (db 'number '+Task Number) (arg 1) Date))))
+         ("due" (let (Date ($dat (arg 2) *DateSep)) (if (= NIL Date) (error "Unrecognised due-date format") (put!> (db 'number '+Task Number) (arg 1) Date))))
          ("parent" (put!> (db 'number '+Task Number) (arg 1) (db 'number '+Task (arg 2))))
          (("children" "blocks" "blockedby") (put!> (db 'number '+Task Number) (arg 1) (if (lst? (arg 2)) (append (get (db 'number '+Task Number) (arg 1)) (mapcar '((Y) (db 'number '+Task Y)) (arg 2))) (db 'number '+Task (arg 2)))))
          (T (prinl "Operation not allowed") NIL) )
@@ -78,9 +80,9 @@
          (("children" "blocks" "blockedby") (if (lst? (arg 2)) (mapcar '((X) (del!> (db 'number '+Task Number) (arg 1) (db 'number '+Task X))) (arg 2)) (del!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (T (prinl "Operation not allowed") NIL) ) ) )
 
-# Fetch properties of a task from an external symbol
-# Usage: (task-fetch '{4})
-(de task-fetch (This)
+# Retrieve properties of a task from an external symbol
+# Usage: (retrieve '{4})
+(de retrieve (This)
    (list
       'number (: number)
       'name (: name)
@@ -94,9 +96,9 @@
       'tags (: tags)
       'comment (: comment) ) )
 
-## Returns a list of all tasks matching criteria
-## Usage: (task-all), (task-all 'priority 1000 2000), (task-all 'tags "mytag"), (task-all 'due "2016-08-16")...
-(de task-all @
+## Returns an index of all tasks matching criteria
+## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag"), (ind 'due "2016-08-16")...
+(de ind @
    (case (arg 1)
       (NIL (collect 'number '+Task))
       ("priority" (collect (arg 1) '+Task
@@ -108,74 +110,40 @@
       (("name" "status" "parent" "children" "blocks" "blockedby" "tags" "comment") (collect (arg 1) '+Task (arg 2)))
       (T (prinl "Operation not allowed") NIL) ) )
 
-## Shows all tasks matching criteria, without expanding linked DB IDs
-## Usage: (task-show-raw), (task-show-raw 'priority 1000 2000), (task-show-raw 'tags "mytag"),
-##        (task-show-raw 'due "2016-08-16")...
-(de task-show-raw @
-   (mapcar task-fetch (pass task-all)) )
+## Returns all tasks matching criteria, without expanding linked DB IDs
+## Usage: (return-raw), (return-raw 'priority 1000 2000), (return-raw 'tags "mytag"),
+##        (return-raw 'due "2016-08-16")...
+(de return-raw @
+   (mapcar retrieve (pass ind)) )
 
-## Shows all tasks matching criteria, expanding linked DB IDs
-## Usage: (task-show), (task-show 'priority 1000 2000), (task-show 'tags "mytag"),
-##        (task-show 'due "2016-08-16")...
-(de task-show @
+## Returns all tasks matching criteria, expanding linked DB IDs
+## Usage: (return), (return 'priority 1000 2000), (return 'tags "mytag"),
+##        (return 'due "2016-08-16")...
+(de return @
    (mapcar '((Task)
       (mapcar '((TaskEntry)
          (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
-            (mapcar task-val-or-tasknum TaskEntry)
-            (task-val-or-tasknum TaskEntry) )) Task))
-               (pass task-show-raw) ) )
+            (mapcar val-or-tasknum TaskEntry)
+            (val-or-tasknum TaskEntry) )) Task))
+               (pass return-raw) ) )
 
-## Prints all tasks matching criteria, one per line, without expanding linked DB IDs
-## Usage: (task-print-raw), (task-print-raw 'priority 1000 2000), (task-print-raw 'tags "mytag"),
-##        (task-print-raw 'due "2016-08-16")...
-(de task-print-raw @
-    (mapcar println (pass task-show-raw))
+## Displays all tasks matching criteria, one per line, without expanding linked DB IDs
+## Usage: (display-raw), (display-raw 'priority 1000 2000), (display-raw 'tags "mytag"),
+##        (display-raw 'due "2016-08-16")...
+(de display-raw @
+    (mapcar println (pass return-raw))
     NIL )
 
-## Prints all tasks matching criteria, one per line, expanding linked DB IDs
-## Usage: (task-print), (task-print 'priority 1000 2000), (task-print 'tags "mytag"),
-##        (task-print 'due "2016-08-16")...
-(de task-print @
-   (mapcar println (pass task-show))
-   NIL )
-
-## Help output
-## Usage: (task-help)
-(de task-help ()
-   (prinl "(task-add Taskname, [Priority, Due, Parent, Children, Blocks, Blockedby, Tags, Comment])")
-   (prinl "(task-delete Tasknumber)")
-   (prinl "(task-edit T/NIL=add/remove, Tasknumber, [FieldName, ...])")
-   (prinl "(task-fetch TaskExternalSymbol)")
-   (prinl "(task-all [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(task-show-raw [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(task-show [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(task-print-raw [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(task-print [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(task-status Number Status)")
-   (prinl "(task-done Number)")
-   (prinl "(task-open Number)")
-   (prinl "(task-rename Number Name)")
-   (prinl "(task-priority Number Priority)")
-   (prinl "(task-tag Number Tag)")
-   (prinl "(task-untag Number Tag)")
-   (prinl "(task-comment Number Comment)")
-   (prinl "(task-uncomment Number)")
-   (prinl "(task-due Number Due)")
-   (prinl "(task-undue Number)")
-   (prinl "(task-parent Number PNumber)")
-   (prinl "(task-unparent Number)")
-   (prinl "(task-child Number CNumber)")
-   (prinl "(task-unchild Number CNumber)")
-   (prinl "(task-block Number BNumber)")
-   (prinl "(task-unblock Number BNumber)")
-   (prinl "(task-help)")
-   (prinl "(task-license)")
-   (prinl "(task-source)")
+## Displays all tasks matching criteria, one per line, expanding linked DB IDs
+## Usage: (display), (display 'priority 1000 2000), (display 'tags "mytag"),
+##        (display 'due "2016-08-16")...
+(de display @
+   (mapcar println (pass return))
    NIL )
 
 ## License/Copyright output
-## Usage: (task-license)
-(de task-license ()
+## Usage: (license)
+(de license ()
    (prinl "Picotask
 
 Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
@@ -197,8 +165,8 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
    NIL )
 
 ## Source output (AGPL compliance)
-## Usage: (task-source)
-(de task-source ()
+## Usage: (source)
+(de source ()
    (prinl "****** picotask executable")
    (prinl)
    (in "__EXECDIR__/picotask" (prinl (till NIL T)))
@@ -210,64 +178,99 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
    (in "__LIBDIR__/libpicotask.l" (prinl (till NIL T)))
    NIL )
 
-## CORE PUBLIC CONVENIENCE FUNCTIONS
+## Help output
+## Usage: (help)
+(de help ()
+   (prinl "(add Taskname, [Priority, Due, Parent, Children, Blocks, Blockedby, Tags, Comment])")
+   (prinl "(destroy Tasknumber)")
+   (prinl "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])")
+   (prinl "(retrieve TaskExternalSymbol)")
+   (prinl "(ind [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(return-raw [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(return [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(display-raw [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(display [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(license)")
+   (prinl "(source)")
+   (prinl "(help)")
+   (prinl "(status Number Status)")
+   (prinl "(isdone Number)")
+   (prinl "(isopen Number)")
+   (prinl "(rename Number Name)")
+   (prinl "(priority Number Priority)")
+   (prinl "(tag Number Tag)")
+   (prinl "(untag Number Tag)")
+   (prinl "(comment Number Comment)")
+   (prinl "(uncomment Number)")
+   (prinl "(due Number Due)")
+   (prinl "(undue Number)")
+   (prinl "(parent Number PNumber)")
+   (prinl "(unparent Number)")
+   (prinl "(child Number CNumber)")
+   (prinl "(unchild Number CNumber)")
+   (prinl "(block Number BNumber)")
+   (prinl "(unblock Number BNumber)")
+   (prinl "(connectdb)")
+   NIL )
 
-(de task-status (Number Status)
-   (task-edit T Number 'status Status) )
+#### PUBLIC WRAPPER FUNCTIONS
 
-(de task-done (Number)
-   (task-status Number "DONE") )
+(de status (Number Status)
+   (modify T Number 'status Status) )
 
-(de task-open (Number)
-   (task-status Number "OPEN") )
+(de setdone (Number)
+   (status Number "DONE") )
 
-(de task-rename (Number Name)
-   (task-edit T Number 'name Name) )
+(de setopen (Number)
+   (status Number "OPEN") )
 
-(de task-priority (Number Priority)
-   (task-edit T Number 'priority Priority) )
+(de rename (Number Name)
+   (modify T Number 'name Name) )
 
-(de task-tag (Number Tag)
-   (task-edit T Number 'tags Tag) )
+(de priority (Number Priority)
+   (modify T Number 'priority Priority) )
 
-(de task-untag (Number Tag)
-   (task-edit NIL Number 'tags Tag) )
+(de tag (Number Tag)
+   (modify T Number 'tags Tag) )
 
-(de task-comment (Number Comment)
-   (task-edit T Number 'comment Comment) )
+(de untag (Number Tag)
+   (modify NIL Number 'tags Tag) )
 
-(de task-uncomment (Number)
-   (task-edit NIL Number 'comment) )
+(de comment (Number Comment)
+   (modify T Number 'comment Comment) )
 
-(de task-due (Number Due)
-   (task-edit T Number 'due Due) )
+(de uncomment (Number)
+   (modify NIL Number 'comment) )
 
-(de task-undue (Number)
-   (task-edit NIL Number 'due) )
+(de due (Number Due)
+   (modify T Number 'due Due) )
 
-(de task-parent (Number PNumber)
-   (task-edit T Number 'parent PNumber) )
+(de undue (Number)
+   (modify NIL Number 'due) )
 
-(de task-unparent (Number)
-   (task-edit NIL Number 'parent) )
+(de parent (Number PNumber)
+   (modify T Number 'parent PNumber) )
 
-(de task-child (Number CNumber)
-   (task-edit T Number 'children CNumber) )
+(de unparent (Number)
+   (modify NIL Number 'parent) )
 
-(de task-unchild (Number CNumber)
-   (task-edit NIL Number 'children CNumber) )
+(de child (Number CNumber)
+   (modify T Number 'children CNumber) )
 
-(de task-block (Number BNumber)
-   (task-edit T Number 'blocks BNumber) )
+(de unchild (Number CNumber)
+   (modify NIL Number 'children CNumber) )
 
-(de task-unblock (Number BNumber)
-   (task-edit NIL Number 'blocks BNumber) )
+(de block (Number BNumber)
+   (modify T Number 'blocks BNumber) )
 
-## FRONTEND FUNCTIONS
+(de unblock (Number BNumber)
+   (modify NIL Number 'blocks BNumber) )
 
-(de connect-db ()
+#### FRONTEND FUNCTIONS
+
+(de connectdb ()
    (pool *TaskDBFile) ) ## initial database (consider block size)
 
 #(de webserve ()
-#   (connect-db)
+#   (connectdb)
 #   (server 8081 "!work") )

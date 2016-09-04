@@ -20,6 +20,10 @@
 (setq *DateSep "-")
 (setq *TaskDBFile "/home/rowan/picotask.db")
 
+####
+
+(load "@lib/db.l")
+
 (class +Task +Entity)
 (rel number    (+Need +Key +Number))
 (rel name      (+Need +Sn +Idx +String))
