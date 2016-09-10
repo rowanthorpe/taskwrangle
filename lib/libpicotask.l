@@ -17,7 +17,7 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-(load "@lib/misc.l" "@lib/btree.l") # "@lib/db.l" "@lib/pilog.l" "@lib/debug.l"
+(load "@lib/misc.l" "@lib/btree.l") # "@lib/debug.l" "@lib/pilog.l"
 
 #### INTERNAL FUNCTIONS
 
