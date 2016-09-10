@@ -19,41 +19,79 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='__PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -"load \"__CONFDIR__/picotask.l\" \"__LIBDIR__/libpicotask.l\"" -"symbols '\''picotask" -"connectdb"'
+cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/picotask.l" "__LIBDIR__/libpicotask.l"'\'' -"symbols '\''picotask" -'\''connectdb'\'''
+terminal_width=${COLUMNS:-\$(stty size | cut -d' ' -f2 || printf '80')}
 
-case "$1" in
-    -h|--help)
-        cat <<EOF
-Usage: $(printf '%s' "$0" | sed -e 's:^.*/\([^/]\+\)$:\1:') [ARGS]
+choplonglines=0
+dryrun=0
+while test ${#} -ne 0; do
+    case "${1}" in
+        -h|--help)
+            cat <<EOF
+Usage: $(printf '%s' "${0}" | sed -e 's:^.*/\([^/]\+\)$:\1:') [OPTIONS] [--] [ARGS]
 
-Picolisp task-manager. With no args, runs interactively. Enter (help) in
-the prompt for info. Enter (bye) to exit.
+Picolisp task-manager. Runs interactively when attached to an interactive
+terminal session without args specified. Otherwise without args reads commands
+from STDIN until EOF. Otherwise, runs provided args in sequence. Run '(help)'
+for quick-list of commands. Run '(bye)' in interactive session to exit.
+
+OPTIONS:
+ -h, --help            : This message
+ -S, --chop-long-lines : Truncate displayed lines to terminal width, same as
+                         the flag used by "less"
+ -n, --dry-run         : Display final commandline instead of eval-ing it
 
 ARGS:
  Forces non-interactive use. Enter shell-escaped picolisp commands without
  enclosing parentheses (like what is used for normal noninteractive use of
  picolisp). For example:
 
-  picotask 'help'
+picotask help
 
  executes as:
 
-  ${cmdline} -'help' -bye
+$("${0}" -n help | sed -r -e "s/(.{$(expr ${terminal_width} - 1 || :)})/\\1\\n/g" | sed -r -e '$! s/$/\\/')
 
 EOF
-        exit 0
-        ;;
-esac
+            exit 0
+            ;;
+        -S|--chop-long-lines)
+            choplonglines=1
+            shift
+            ;;
+        -n|--dry-run)
+            dryrun=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            printf 'Unknown flag "%s"\n' "${1}" >&2
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
-if test $# -ne 0; then
+if test ${#} -ne 0; then
     for _arg do
         cmdline="${cmdline} -'$(printf '%s' "${_arg}" | sed -r -e "s/'/'\\\\''/g")'"
     done
-    eval "exec $cmdline -bye"
+    cmdline="${cmdline} -bye"
 elif ! tty -s; then
-    eval "exec $cmdline $(sed -r -e "s/'/'\\\\''/g; 1 s/^\\(/-'/; \$ s/\\)\$/'/") -bye"
+    cmdline="${cmdline} -'prog $(sed -r -e "s/'/'\\\\''/g")' -bye"
 #TODO: this would be better, and not hit commandline-length limits, but why doesn't it work?
-#    eval "exec $cmdline -'in NIL (run (till NIL T))' -bye"
+#    cmdline="${cmdline} -'in NIL (run (pack "(prog " (till NIL T) ")"))' -bye"
 else
-    eval "exec $cmdline +"
+    cmdline="${cmdline} +"
+fi
+test 0 -eq ${choplonglines} || cmdline="${cmdline} | sed -r -e \"s/^(.{\${terminal_width}}).*\\\$/\\1/\""
+if test 1 -eq ${dryrun}; then
+    printf '%s\n' "${cmdline}"
+else
+    eval "${cmdline}"
 fi
