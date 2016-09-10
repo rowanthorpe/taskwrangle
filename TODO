@@ -7,4 +7,5 @@ TODO:
    - check things are set/compared appropriately as transient-syms "XX" instead of interned-syms 'XX
  * add worklog/history (and ability to view timeline of changes)
  * fix "STDIN-handling" in commandline mode (presently reads STDIN and transforms it to args, which risks hitting commandline length limits)
+ * capture and return errors as retvals in commandline mode (rather than dropping to interactive debug mode)
  * copy/adapt web frontend logic from demo addressbook app, etc on wiki
