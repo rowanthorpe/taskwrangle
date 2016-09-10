@@ -50,9 +50,10 @@ if test $# -ne 0; then
         cmdline="${cmdline} -'$(printf '%s' "${_arg}" | sed -r -e "s/'/'\\\\''/g")'"
     done
     eval "exec $cmdline -bye"
-##TODO: not yet working (why?)
-#elif ! tty -s; then
-#    eval "exec $cmdline -\"in NIL (run (till NIL T))\" -bye"
+elif ! tty -s; then
+    eval "exec $cmdline $(sed -r -e "s/'/'\\\\''/g; 1 s/^\\(/-'/; \$ s/\\)\$/'/") -bye"
+#TODO: this would be better, and not hit commandline-length limits, but why doesn't it work?
+#    eval "exec $cmdline -'in NIL (run (till NIL T))' -bye"
 else
     eval "exec $cmdline +"
 fi
