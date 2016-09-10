@@ -68,7 +68,7 @@
    (lose!> (db 'number '+Task Number)) )
 
 # Modifies a task (first arg =T to add/set, =NIL to remove/clear)
-# Usage: (modify T 2 'status "WAITFOR"), (modify NIL 1 'blocks 3), etc
+# Usage: (modify T 2 'status "WAITFOR"), (modify NIL 1 'blocks 3)
 (de modify (Set Number . @)
    (if Set
       (case (arg 1)
@@ -78,52 +78,49 @@
          ("due" (let (Date ($dat (arg 2) *DateSep)) (if (= NIL Date) (error "Unrecognised due-date format") (put!> (db 'number '+Task Number) (arg 1) Date))))
          ("parent" (put!> (db 'number '+Task Number) (arg 1) (db 'number '+Task (arg 2))))
          (("children" "blocks" "blockedby") (put!> (db 'number '+Task Number) (arg 1) (if (lst? (arg 2)) (append (get (db 'number '+Task Number) (arg 1)) (mapcar '((Y) (db 'number '+Task Y)) (arg 2))) (db 'number '+Task (arg 2)))))
-         (T (prinl "Operation not allowed") NIL) )
+         (T (nil (prinl "Operation not allowed"))) )
       (case (arg 1)
          ("tags" (if (lst? (arg 2)) (mapcar '((X) (del!> (db 'number '+Task Number) (arg 1) X)) (arg 2)) (del!> (db 'number '+Task Number) (arg 1) (arg 2))))
-         (("comment" "due" "parent") (put!> (db 'number '+Task Number) (arg 1) NIL))
+         (("comment" "due" "parent") (nil (put!> (db 'number '+Task Number) (arg 1))))
          (("children" "blocks" "blockedby") (if (lst? (arg 2)) (mapcar '((X) (del!> (db 'number '+Task Number) (arg 1) (db 'number '+Task X))) (arg 2)) (del!> (db 'number '+Task Number) (arg 1) (arg 2))))
-         (T (prinl "Operation not allowed") NIL) ) ) )
+         (T (nil (prinl "Operation not allowed"))) ) ) )
 
 # Retrieve properties of a task from an external symbol
-# Usage: (retrieve '{4})
-(de retrieve (This)
-   (list
-      'number (: number)
-      'name (: name)
-      'status (: status)
-      'priority (: priority)
-      'tags (: tags)
-      'due (: due)
-      'parent (: parent)
-      'children (: children)
-      'blocks (: blocks)
-      'blockedby (: blockedby)
-      'comment (: comment) ) )
+# Usage: (retrieve '{4}), (retrieve '{4} '(name status))
+(de retrieve (This Fields)
+   (mapcan '((X) (list X (get This X)))
+      (or Fields '(number name status priority tags due parent children blocks blockedby comment)) ) )
 
 ## Returns an index of all tasks matching criteria
-## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag"), (ind 'due "2016-08-16")...
+## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag" 'due "2016-08-16")
 (de ind @
-   (case (arg 1)
-      (NIL (collect 'number '+Task))
-      (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment") (collect (arg 1) '+Task (arg 2)))
-      ("priority" (collect (arg 1) '+Task
-            (arg 2)
-            (or (arg 3) (arg 2)) ))
-      ("due" (collect (arg 1) '+Task
-            ($dat (arg 2) *DateSep)
-            ($dat (or (arg 3) (arg 2)) *DateSep) ))
-      (T (prinl "Operation not allowed") NIL) ) )
+   (let (Var (next) Val1 (next))
+      (case Var
+         (NIL (collect 'number '+Task))
+         (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
+            (if (args)
+               (sect (collect Var '+Task Val1) (pass ind))
+               (collect Var '+Task Val1) ) )
+         (T
+            (let (Val2 (next))
+               (case Var
+                  ("priority"
+                     (if (args)
+                        (sect (collect Var '+Task Val1 Val2) (pass ind))
+                        (collect Var '+Task Val1 (or Val2 Val1)) ) )
+                  ("due"
+                     (if (args)
+                        (sect (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) (pass ind))
+                        (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
+                  (T (nil (prinl "Operation not allowed"))) ) ) ) ) ) )
 
 ## Returns all tasks matching criteria, without expanding linked DB IDs
-## Usage: (return-raw), (return-raw 'priority 1000 2000), (return-raw 'tags "mytag"),
-##        (return-raw 'due "2016-08-16")...
+## Usage: (return-raw), (return-raw 'priority 1000 2000), (return-raw 'tags "mytag" 'due "2016-08-16")
 (de return-raw @
    (mapcar retrieve (pass ind)) )
 
 ## Returns all tasks matching criteria, expanding linked DB IDs
-## Usage: (return), (return 'priority 1000 2000), (return 'tags "mytag"),
-##        (return 'due "2016-08-16")...
+## Usage: (return), (return 'priority 1000 2000), (return 'tags "mytag" 'due "2016-08-16")
 (de return @
    (mapcar '((Task)
       (mapcar '((TaskEntry)
@@ -133,18 +130,14 @@
                (pass return-raw) ) )
 
 ## Displays all tasks matching criteria, one per line, without expanding linked DB IDs
-## Usage: (display-raw), (display-raw 'priority 1000 2000), (display-raw 'tags "mytag"),
-##        (display-raw 'due "2016-08-16")...
+## Usage: (display-raw), (display-raw 'priority 1000 2000), (display-raw 'tags "mytag" 'due "2016-08-16")
 (de display-raw @
-    (mapcar println (pass return-raw))
-    NIL )
+   (nil (mapcar println (pass return-raw))) )
 
 ## Displays all tasks matching criteria, one per line, expanding linked DB IDs
-## Usage: (display), (display 'priority 1000 2000), (display 'tags "mytag"),
-##        (display 'due "2016-08-16")...
+## Usage: (display), (display 'priority 1000 2000), (display 'tags "mytag" 'due "2016-08-16")
 (de display @
-   (mapcar println (pass return))
-   NIL )
+   (nil (mapcar println (pass return))) )
 
 ## License/Copyright output
 ## Usage: (license)
@@ -190,11 +183,11 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
    (prinl "(destroy Tasknumber)")
    (prinl "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])")
    (prinl "(retrieve TaskExternalSymbol)")
-   (prinl "(ind [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(return-raw [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(return [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(display-raw [FieldName, arg1/start, [arg2/end]])")
-   (prinl "(display [FieldName, arg1/start, [arg2/end]])")
+   (prinl "(ind [[FieldName, arg1/start, [arg2/end]], ...])")
+   (prinl "(return-raw [[FieldName, arg1/start, [arg2/end]], ...])")
+   (prinl "(return [[FieldName, arg1/start, [arg2/end]], ...])")
+   (prinl "(display-raw [[FieldName, arg1/start, [arg2/end]], ...])")
+   (prinl "(display [[FieldName, arg1/start, [arg2/end]], ...])")
    (prinl "(license)")
    (prinl "(source)")
    (prinl "(help)")
