@@ -106,13 +106,13 @@
 (de ind @
    (case (arg 1)
       (NIL (collect 'number '+Task))
+      (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment") (collect (arg 1) '+Task (arg 2)))
       ("priority" (collect (arg 1) '+Task
             (arg 2)
             (or (arg 3) (arg 2)) ))
       ("due" (collect (arg 1) '+Task
             ($dat (arg 2) *DateSep)
             ($dat (or (arg 3) (arg 2)) *DateSep) ))
-      (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment") (collect (arg 1) '+Task (arg 2)))
       (T (prinl "Operation not allowed") NIL) ) )
 
 ## Returns all tasks matching criteria, without expanding linked DB IDs
