@@ -47,19 +47,19 @@
 
 # Adds a task. Uses default priority of 1000 if not specified
 # Usage: (add "call home")
-(de add (Taskname Priority Due Parent Children Blocks Blockedby Tags Comment)
+(de add (Taskname Priority Tags Due Parent Children Blocks Blockedby Comment)
    (when Taskname
       (new! '(+Task)
          'number (genKey 'number '+Task)
          'name Taskname
          'status "NEW"
          'priority (or Priority 1000)
+         'tags Tags
          'due Due
          'parent Parent
          'children Children
          'blocks Blocks
          'blockedby Blockedby
-         'tags Tags
          'comment Comment ) ) )
 
 # Destroys a task
@@ -93,12 +93,12 @@
       'name (: name)
       'status (: status)
       'priority (: priority)
+      'tags (: tags)
       'due (: due)
       'parent (: parent)
       'children (: children)
       'blocks (: blocks)
       'blockedby (: blockedby)
-      'tags (: tags)
       'comment (: comment) ) )
 
 ## Returns an index of all tasks matching criteria
@@ -112,7 +112,7 @@
       ("due" (collect (arg 1) '+Task
             ($dat (arg 2) *DateSep)
             ($dat (or (arg 3) (arg 2)) *DateSep) ))
-      (("name" "status" "parent" "children" "blocks" "blockedby" "tags" "comment") (collect (arg 1) '+Task (arg 2)))
+      (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment") (collect (arg 1) '+Task (arg 2)))
       (T (prinl "Operation not allowed") NIL) ) )
 
 ## Returns all tasks matching criteria, without expanding linked DB IDs
@@ -186,7 +186,7 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
 ## Help output
 ## Usage: (help)
 (de help ()
-   (prinl "(add Taskname, [Priority, Due, Parent, Children, Blocks, Blockedby, Tags, Comment])")
+   (prinl "(add Taskname, [Priority, Tags, Due, Parent, Children, Blocks, Blockedby, Comment])")
    (prinl "(destroy Tasknumber)")
    (prinl "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])")
    (prinl "(retrieve TaskExternalSymbol)")
@@ -241,12 +241,6 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
 (de untag (Number Tag)
    (modify NIL Number 'tags Tag) )
 
-(de comment (Number Comment)
-   (get-or-set Number 'comment Comment) )
-
-(de uncomment (Number)
-   (modify NIL Number 'comment) )
-
 (de due (Number Due)
    (get-or-set Number 'due Due) )
 
@@ -270,6 +264,12 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
 
 (de unblock (Number BNumber)
    (modify NIL Number 'blocks BNumber) )
+
+(de comment (Number Comment)
+   (get-or-set Number 'comment Comment) )
+
+(de uncomment (Number)
+   (modify NIL Number 'comment) )
 
 #### FRONTEND FUNCTIONS
 
