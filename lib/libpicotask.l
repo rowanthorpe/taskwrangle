@@ -95,32 +95,33 @@
 ## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag" 'due "2016-08-16")
 (de ind @
    (let (Var (next) Val1 (next))
-      (case Var
-         (NIL (collect 'number '+Task))
-         (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
-            (if (args)
-               (sect (collect Var '+Task Val1) (pass ind))
-               (collect Var '+Task Val1) ) )
-         (T
-            (let (Val2 (next))
-               (case Var
-                  ("priority"
-                     (if (args)
-                        (sect (collect Var '+Task Val1 Val2) (pass ind))
-                        (collect Var '+Task Val1 (or Val2 Val1)) ) )
-                  ("due"
-                     (if (args)
-                        (sect (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) (pass ind))
-                        (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
-                  (T (nil (prinl "Operation not allowed"))) ) ) ) ) ) )
+      (if (and Var Val1)
+         (case Var
+            (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
+               (if (args)
+                  (sect (collect Var '+Task Val1) (pass ind))
+                  (collect Var '+Task Val1) ) )
+            (T
+               (let (Val2 (next))
+                  (case Var
+                     ("priority"
+                        (if (args)
+                           (sect (collect Var '+Task Val1 Val2) (pass ind))
+                           (collect Var '+Task Val1 (or Val2 Val1)) ) )
+                     ("due"
+                        (if (args)
+                           (sect (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) (pass ind))
+                           (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
+                     (T (nil (prinl "Operation not allowed"))) ) ) ) )
+         (collect 'number '+Task)) ) )
 
-## Returns all tasks matching criteria, without expanding linked DB IDs
-## Usage: (return-raw), (return-raw 'priority 1000 2000), (return-raw 'tags "mytag" 'due "2016-08-16")
-(de return-raw @
-   (mapcar retrieve (pass ind)) )
+## Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying fields to return (default all)
+## Usage: (return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags "mytag" 'due "2016-08-16") 'name)
+(de return-raw (Crit . @)
+   (mapcar '((X) (pass retrieve X)) (apply ind Crit)) )
 
-## Returns all tasks matching criteria, expanding linked DB IDs
-## Usage: (return), (return 'priority 1000 2000), (return 'tags "mytag" 'due "2016-08-16")
+## Returns all tasks matching criteria, expanding linked DB IDs, optionally specifying fields to return (default all)
+## Usage: (return), (return '(priority 1000 2000)), (return '(tags "mytag" 'due "2016-08-16") 'name)
 (de return @
    (mapcar '((Task)
       (mapcar '((TaskEntry)
@@ -129,13 +130,13 @@
             (val-or-tasknum TaskEntry) )) Task))
                (pass return-raw) ) )
 
-## Displays all tasks matching criteria, one per line, without expanding linked DB IDs
-## Usage: (display-raw), (display-raw 'priority 1000 2000), (display-raw 'tags "mytag" 'due "2016-08-16")
+## Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying fields to return (default all)
+## Usage: (display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags "mytag" 'due "2016-08-16") 'name)
 (de display-raw @
    (nil (mapcar println (pass return-raw))) )
 
-## Displays all tasks matching criteria, one per line, expanding linked DB IDs
-## Usage: (display), (display 'priority 1000 2000), (display 'tags "mytag" 'due "2016-08-16")
+## Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying fields to return (default all)
+## Usage: (display), (display '(priority 1000 2000)), (display '(tags "mytag" 'due "2016-08-16") 'name)
 (de display @
    (nil (mapcar println (pass return))) )
 
@@ -184,10 +185,10 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
    (prinl "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])")
    (prinl "(retrieve TaskExternalSymbol)")
    (prinl "(ind [[FieldName, arg1/start, [arg2/end]], ...])")
-   (prinl "(return-raw [[FieldName, arg1/start, [arg2/end]], ...])")
-   (prinl "(return [[FieldName, arg1/start, [arg2/end]], ...])")
-   (prinl "(display-raw [[FieldName, arg1/start, [arg2/end]], ...])")
-   (prinl "(display [[FieldName, arg1/start, [arg2/end]], ...])")
+   (prinl "(return-raw '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
+   (prinl "(return '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
+   (prinl "(display-raw '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
+   (prinl "(display '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
    (prinl "(license)")
    (prinl "(source)")
    (prinl "(help)")

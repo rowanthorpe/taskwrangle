@@ -1,7 +1,6 @@
 TODO:
 
  * add a trickle-down-flag "sortby" for ordering (ind), (return[-raw]), (display[-raw]) results
- * add a command "(select)" for showing selected fields only for (ind), (return[-raw]), (display[-raw]) results
  * add constraints/error-checks e.g.
    - in (add) don't add items to blocks/blockedby/parent/children unless type == '(+Task)
    - check things are set/compared appropriately as transient-syms "XX" instead of interned-syms 'XX
