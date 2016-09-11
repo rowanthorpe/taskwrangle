@@ -85,11 +85,11 @@
          (("children" "blocks" "blockedby") (if (lst? (arg 2)) (mapcar '((X) (del!> (db 'number '+Task Number) (arg 1) (db 'number '+Task X))) (arg 2)) (del!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (T (nil (prinl "Operation not allowed"))) ) ) )
 
-# Retrieve properties of a task from an external symbol
-# Usage: (retrieve '{4}), (retrieve '{4} '(name status))
-(de retrieve (This Fields)
+# Retrieve properties of a task from an external symbol, optionally specifying fields to retrieve (default all)
+# Usage: (retrieve '{4}), (retrieve '{4} 'name 'status)
+(de retrieve (This . @)
    (mapcan '((X) (list X (get This X)))
-      (or Fields '(number name status priority tags due parent children blocks blockedby comment)) ) )
+      (or (rest) '(number name status priority tags due parent children blocks blockedby comment)) ) )
 
 ## Returns an index of all tasks matching criteria
 ## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag" 'due "2016-08-16")
