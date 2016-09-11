@@ -15,9 +15,9 @@ Installation
 ------------
 
 Copy `conf/picotask.l.template` to `conf/picotask.l` and edit the copied file to
-suit your needs, then run `install.sh`. To toggle un/install or customize
-installation locations use flags (see `install.sh -h` for details) or for
-greater control edit `install.sh` directly.
+suit your needs, then run `./install.sh`. To toggle un/install or customize
+installation locations use flags (see `./install.sh -h` for details) or for
+greater control edit `./install.sh` directly.
 
 Rationale
 ---------
