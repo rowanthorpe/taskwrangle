@@ -24,8 +24,7 @@
 (symbols 'picotask 'pico)
 
 (de error (Error)
-    (prinl (pack "ERROR: " Error))
-    NIL )
+   (nil (prinl (pack "ERROR: " Error))) )
 
 (de known-status (Status)
    (case Status
@@ -98,9 +97,9 @@
       (if (and Var Val1)
          (case Var
             (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
-               (if (args)
-                  (sect (collect Var '+Task Val1) (pass ind))
-                  (collect Var '+Task Val1) ) )
+             (if (args)
+                (sect (collect Var '+Task Val1) (pass ind))
+                (collect Var '+Task Val1) ) )
             (T
                (let (Val2 (next))
                   (case Var
@@ -113,7 +112,7 @@
                            (sect (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) (pass ind))
                            (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
                      (T (nil (prinl "Operation not allowed"))) ) ) ) )
-         (collect 'number '+Task)) ) )
+         (collect 'number '+Task) ) ) )
 
 ## Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying fields to return (default all)
 ## Usage: (return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags "mytag" 'due "2016-08-16") 'name)
@@ -124,11 +123,11 @@
 ## Usage: (return), (return '(priority 1000 2000)), (return '(tags "mytag" 'due "2016-08-16") 'name)
 (de return @
    (mapcar '((Task)
-      (mapcar '((TaskEntry)
-         (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
-            (mapcar val-or-tasknum TaskEntry)
-            (val-or-tasknum TaskEntry) )) Task))
-               (pass return-raw) ) )
+             (mapcar '((TaskEntry)
+                       (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
+                          (mapcar val-or-tasknum TaskEntry)
+                          (val-or-tasknum TaskEntry) ) ) Task ) )
+      (pass return-raw) ) )
 
 ## Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying fields to return (default all)
 ## Usage: (display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags "mytag" 'due "2016-08-16") 'name)
@@ -143,7 +142,7 @@
 ## License/Copyright output
 ## Usage: (license)
 (de license ()
-   (prinl "Picotask
+   (nil (prinl "Picotask
 
 Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
 posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
@@ -160,57 +159,62 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")
-   NIL )
+along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")) )
 
 ## Source output (AGPL compliance)
 ## Usage: (source)
 (de source ()
-   (prinl "****** picotask executable")
-   (prinl)
-   (in "__EXECDIR__/picotask" (prinl (till NIL T)))
-   (prinl "****** picotask config")
-   (prinl)
-   (in "__CONFDIR__/picotask.l" (prinl (till NIL T)))
-   (prinl "****** libpicolisp.l")
-   (prinl)
-   (in "__LIBDIR__/libpicotask.l" (prinl (till NIL T)))
-   NIL )
+   (nil
+      (prinl "****** picotask executable")
+      (prinl)
+      (in "__EXECDIR__/picotask" (prinl (till NIL T)))
+      (prinl "****** picotask config")
+      (prinl)
+      (in "__CONFDIR__/picotask.l" (prinl (till NIL T)))
+      (prinl "****** libpicolisp.l")
+      (prinl)
+      (in "__LIBDIR__/libpicotask.l" (prinl (till NIL T))) ) )
 
-## Help output
+## Build help output
+## Usage: (gethelp)
+(de gethelp @
+   (with 'defs
+      (=: add "Taskname, [Priority, Tags, Due, Parent, Children, Blocks, Blockedby, Comment]")
+      (=: destroy "Tasknumber")
+      (=: modify "T/NIL=add/remove, Tasknumber, [FieldName, ...]")
+      (=: retrieve "TaskExternalSymbol")
+      (=: ind "[[FieldName, arg1/start, [arg2/end]], ...]")
+      (=: return-raw "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
+      (=: return "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
+      (=: display-raw "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
+      (=: display "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
+      (=: license)
+      (=: source)
+      (=: help)
+      (=: status "Number Status")
+      (=: isdone "Number")
+      (=: isopen "Number")
+      (=: rename "Number Name")
+      (=: priority "Number Priority")
+      (=: tag "Number Tag")
+      (=: untag "Number Tag")
+      (=: comment "Number Comment")
+      (=: uncomment "Number")
+      (=: due "Number Due")
+      (=: undue "Number")
+      (=: parent "Number PNumber")
+      (=: unparent "Number")
+      (=: child "Number CNumber")
+      (=: unchild "Number CNumber")
+      (=: block "Number BNumber")
+      (=: unblock "Number BNumber")
+      (=: connectdb)
+      (mapcar '((X) (list X (get This X))) (or (rest) '(add destroy modify retrieve ind return-raw return display-raw display license source help status isdone isopen rename priority tag untag comment uncomment due undue parent unparent child unchild block unblock connectdb))) ) )
+
+## Print help output
 ## Usage: (help)
-(de help ()
-   (prinl "(add Taskname, [Priority, Tags, Due, Parent, Children, Blocks, Blockedby, Comment])")
-   (prinl "(destroy Tasknumber)")
-   (prinl "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])")
-   (prinl "(retrieve TaskExternalSymbol)")
-   (prinl "(ind [[FieldName, arg1/start, [arg2/end]], ...])")
-   (prinl "(return-raw '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
-   (prinl "(return '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
-   (prinl "(display-raw '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
-   (prinl "(display '([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...])")
-   (prinl "(license)")
-   (prinl "(source)")
-   (prinl "(help)")
-   (prinl "(status Number Status)")
-   (prinl "(isdone Number)")
-   (prinl "(isopen Number)")
-   (prinl "(rename Number Name)")
-   (prinl "(priority Number Priority)")
-   (prinl "(tag Number Tag)")
-   (prinl "(untag Number Tag)")
-   (prinl "(comment Number Comment)")
-   (prinl "(uncomment Number)")
-   (prinl "(due Number Due)")
-   (prinl "(undue Number)")
-   (prinl "(parent Number PNumber)")
-   (prinl "(unparent Number)")
-   (prinl "(child Number CNumber)")
-   (prinl "(unchild Number CNumber)")
-   (prinl "(block Number BNumber)")
-   (prinl "(unblock Number BNumber)")
-   (prinl "(connectdb)")
-   NIL )
+(de help @
+   (nil (mapcar println (pass gethelp))) )
 
 #### PUBLIC WRAPPER FUNCTIONS
 
