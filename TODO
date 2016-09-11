@@ -1,6 +1,7 @@
 TODO:
 
  * add a trickle-down-flag "sortby" for ordering (ind), (return[-raw]), (display[-raw]) results
+ * handle matching fields to NIL in (ind), or at least error-out if NIL specified
  * add constraints/error-checks e.g.
    - in (add) don't add items to blocks/blockedby/parent/children unless type == '(+Task)
    - check things are set/compared appropriately as transient-syms "XX" instead of interned-syms 'XX
