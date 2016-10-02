@@ -1,11 +1,11 @@
 TODO:
 
- * add a trickle-down-flag "sortby" for ordering (ind), (return[-raw]), (display[-raw]) results
- * handle matching fields to NIL in (ind), or at least error-out if NIL specified
+ * handle matching fields to NIL in (ind), or at least error-out if NIL specified as match
  * add constraints/error-checks e.g.
    - in (add) don't add items to blocks/blockedby/parent/children unless type == '(+Task)
    - check things are set/compared appropriately as transient-syms "XX" instead of interned-syms 'XX
  * add worklog/history (and ability to view timeline of changes)
  * fix "STDIN-handling" in commandline mode (presently reads STDIN and transforms it to args, which risks hitting commandline length limits)
  * capture and return errors as retvals in commandline mode (rather than dropping to interactive debug mode)
+ * allow a list of sort-fields to cause heirarchical sort by tie-breakers
  * copy/adapt web frontend logic from demo addressbook app, etc on wiki

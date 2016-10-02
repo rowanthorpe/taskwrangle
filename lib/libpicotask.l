@@ -1,6 +1,6 @@
 ##    Copyright © 2016 Rowan Thorpe, initially based entirely on a "taskdb" demo-app
 ##    posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
-##    intended to develop extensively from there.
+##    has been developed extensively from there.
 ##
 ##    This file is part of Picotask.
 ##
@@ -19,9 +19,9 @@
 
 (load "@lib/misc.l" "@lib/btree.l") # "@lib/debug.l" "@lib/pilog.l"
 
-#### INTERNAL FUNCTIONS
-
 (symbols 'picotask 'pico)
+
+#### PRIVATE HELPER FUNCTIONS
 
 (de error (Error)
    (nil (prinl (pack "ERROR: " Error))) )
@@ -42,11 +42,13 @@
       (modify T Number Field Val)
       (get (db 'number '+Task Number) Field) ) )
 
-#### CORE PUBLIC FUNCTIONS
+#### PUBLIC CORE FUNCTIONS
 
-# Adds a task. Uses default priority of 1000 if not specified
-# Usage: (add "call home")
 (de add (Taskname Priority Tags Due Parent Children Blocks Blockedby Comment)
+   "(add Taskname, [Priority, Tags, Due, Parent, Children, Blocks, Blockedby, Comment])"
+   "Adds a task. Uses default priority of 1000 if not specified"
+   "(add \"call home\"), (add \"call home\" 1000 \"work\")"
+
    (when Taskname
       (new! '(+Task)
          'number (genKey 'number '+Task)
@@ -61,15 +63,19 @@
          'blockedby Blockedby
          'comment Comment ) ) )
 
-# Destroys a task
-# Usage: (destroy 1)
 (de destroy (Number)
+   "(destroy Tasknumber)"
+   "Destroys a task"
+   "(destroy 1)"
+
    (lose!> (db 'number '+Task Number)) )
 
-# Modifies a task (first arg =T to add/set, =NIL to remove/clear)
-# Usage: (modify T 2 'status "WAITFOR"), (modify NIL 1 'blocks 3)
-(de modify (Set Number . @)
-   (if Set
+(de modify (SetVal Number . @)
+   "(modify T/NIL=add/remove, Tasknumber, [FieldName, ...])"
+   "Modifies a task (first arg =T to add/set value, =NIL to remove/clear)"
+   "(modify T 2 'status \"WAITFOR\"), (modify NIL 1 'blocks 3)"
+
+   (if SetVal
       (case (arg 1)
          ("status" (when (known-status (arg 2)) (put!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (("name" "priority" "comment") (put!> (db 'number '+Task Number) (arg 1) (arg 2)))
@@ -84,63 +90,90 @@
          (("children" "blocks" "blockedby") (if (lst? (arg 2)) (mapcar '((X) (del!> (db 'number '+Task Number) (arg 1) (db 'number '+Task X))) (arg 2)) (del!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (T (nil (prinl "Operation not allowed"))) ) ) )
 
-# Retrieve properties of a task from an external symbol, optionally specifying fields to retrieve (default all)
-# Usage: (retrieve '{4}), (retrieve '{4} 'name 'status)
-(de retrieve (This . @)
-   (mapcan '((X) (list X (get This X)))
-      (or (rest) '(number name status priority tags due parent children blocks blockedby comment)) ) )
+(de retrieve (Objects RetFields . @)
+   "(retrieve Objects (list or symbol), [RetFields (list or symbol)])"
+   "Retrieve properties of a task(s) from an external symbol(s), optionally specifying field(s) to retrieve (default all)"
+   "(retrieve {4}), (retrieve '({2} {4}) 'name 'status) (retrieve '({2} {4}) '(name status))"
 
-## Returns an index of all tasks matching criteria
-## Usage: (ind), (ind 'priority 1000 2000), (ind 'tags "mytag" 'due "2016-08-16")
+   (mapcar
+      '((Ob)
+         (mapcan
+            '((Field) (list (get Ob Field)))
+            (if RetFields
+               (if (lst? RetFields)
+                  RetFields
+                  (pass list RetFields) )
+               '(number name status priority tags due parent children blocks blockedby comment) ) ) )
+      (if (lst? Objects)
+         Objects
+         (list Objects) ) ) )
+
 (de ind @
-   (let (Var (next) Val1 (next))
-      (if (and Var Val1)
-         (case Var
-            (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
-             (if (args)
-                (sect (collect Var '+Task Val1) (pass ind))
-                (collect Var '+Task Val1) ) )
-            (T
-               (let (Val2 (next))
-                  (case Var
-                     ("priority"
-                        (if (args)
-                           (sect (collect Var '+Task Val1 Val2) (pass ind))
-                           (collect Var '+Task Val1 (or Val2 Val1)) ) )
-                     ("due"
-                        (if (args)
-                           (sect (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) (pass ind))
-                           (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
-                     (T (nil (prinl "Operation not allowed"))) ) ) ) )
-         (collect 'number '+Task) ) ) )
+   "(ind [[FieldName, arg1/start, [arg2/end], ...] | Equivalent-as-a-list])"
+   "Returns an index of all tasks matching criteria"
+   "(ind), (ind 'priority 1000 2000), (ind 'tags \"mytag\" 'due \"2016-08-16\"), (ind '(tags \"mytag\" due \"2016-08-16\"))"
 
-## Sorts an index of tasks by a specified field
-## Usage: (dosort 'name '{2} '{4})
-## TODO: make SortField a list (SortFields), use first element as primary sort, next as secondary, etc.
-(de dosort (SortField Lst)
-   (if Sortfield
-      (by
-         (case SortField
-               (("number" "name" "priority" "tags" "parent" "comment") '((X) (get X SortField)))
-               (("children" "blocks" "blockedby") '((X) (length (get X SortField))))
-               ("due" '((X) ($dat (get X SortField)))) )
-         sort
-         Lst )
-      Lst ) ) #FIXME - then update callers below (and their help messages)
+   (let (Args (if (lst? (arg 1)) (arg 1) (rest)))
+      (let (Var (pop 'Args) Val1 (pop 'Args))
+         (if (and Var Val1)
+            (case Var
+               (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
+                   (if Args
+                      (sect (collect Var '+Task Val1) (ind Args))
+                      (collect Var '+Task Val1) ) )
+               (T
+                  (let (Val2 (pop 'Args))
+                     (case Var
+                        ("priority"
+                           (if Args
+                              (sect
+                                 (collect Var '+Task Val1 Val2)
+                                 (ind Args) )
+                              (collect Var '+Task Val1 (or Val2 Val1)) ) )
+                        ("due"
+                           (if Args
+                              (sect
+                                 (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep))
+                                 (ind Args) )
+                              (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
+                        (T (nil (prinl "Operation not allowed"))) ) ) ) )
+            (collect 'number '+Task) ) ) ) )
 
-## Reverse-sorts an index of tasks by a specified field
-## Usage: (dorevsort 'name '{2} '{4})
+(de dosort (Objects SortFields)
+   "(dosort Objects (list or symbol), [SortField(s) (list or symbol)])"
+   "Sorts an index of task(s) by specified field(s)"
+   "(dosort '({2} {4}) 'priority), (dosort '({2} {4}) '(priority due name)), (dosort '({2} {4}) 'priority 'due 'name)"
+
+   (if SortFields
+      (let (SortField (if (lst? SortFields) (car SortFields) SortFields))
+         (by
+            (case SortField
+                  (("number" "name" "priority" "tags" "parent" "comment") '((X) (get X SortField)))
+                  (("children" "blocks" "blockedby") '((X) (length (get X SortField))))
+                  ("due" '((X) ($dat (get X SortField)))) )
+            sort
+            Objects ) )
+      Objects ) )
+
 (de dorevsort @
+   "(dorevsort Objects (list or symbol), [SortField(s) (list or symbol)])"
+   "Reverse-sorts an index of task(s) by specified field(s)"
+   "(dorevsort '({2} {4}) 'priority), (dorevsort '({2} {4}) '(priority due name)), (dorevsort '({2} {4}) 'priority 'due 'name)"
+
    (reverse (pass dosort)) )
 
-## Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
-## Usage: (return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
-(de return-raw (Crit SortField . @)
-   (mapcar '((X) (pass retrieve X)) (dosort Sortfield (apply ind Crit))) )
+(de return-raw (Criteria SortFields RetFields)
+   "(return-raw '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying field(s) to sort by (default none), and to return (default all)"
+   "(return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (return-raw '(tags \"mytag\" due \"2016-08-16\") '(name) 'name 'priority)"
 
-## Returns all tasks matching criteria, expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
-## Usage: (return), (return '(priority 1000 2000)), (return '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
+   (retrieve (dosort (ind Criteria) SortFields) RetFields) )
+
 (de return @
+   "(return '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Returns all tasks matching criteria, expanding linked DB IDs, optionally specifying field(s) to sort by (default none), and to return (default all)"
+   "(return), (return '(priority 1000 2000)), (return '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (return '(tags \"mytag\" due \"2016-08-16\") '(name) 'name 'priority)"
+
    (mapcar '((Task)
              (mapcar '((TaskEntry)
                        (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
@@ -148,19 +181,39 @@
                           (val-or-tasknum TaskEntry) ) ) Task ) )
       (pass return-raw) ) )
 
-## Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
-## Usage: (display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
 (de display-raw @
+   "(display-raw '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying field(s) to sort by (default none), and to return (default all)"
+   "(display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (display-raw '(tags \"mytag\" due \"2016-08-16\") 'name 'name 'priority)"
+
    (nil (mapcar println (pass return-raw))) )
 
-## Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
-## Usage: (display), (display '(priority 1000 2000)), (display '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
+(de rev-display-raw @
+   "(rev-display-raw '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying field(s) to reverse-sort by (default none), and to return (default all)"
+   "(rev-display-raw), (rev-display-raw '(priority 1000 2000)), (rev-display-raw '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (rev-display-raw '(tags \"mytag\" due \"2016-08-16\") 'name 'name 'priority)"
+
+   (nil (mapcar println (reverse (pass return-raw)))) )
+
 (de display @
+   "(display '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying field(s) to sort by (default none), and to return (default all)"
+   "(display), (display '(priority 1000 2000)), (display '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (display '(tags \"mytag\" due \"2016-08-16\") 'name 'name 'priority)"
+
    (nil (mapcar println (pass return))) )
 
-## License/Copyright output
-## Usage: (license)
+(de rev-display @
+   "(rev-display '([[FieldName, arg1/start, [arg2/end]], ...]), SortField(s) (list or symbol), RetField(s) (list or symbol))"
+   "Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying field(s) to reverse-sort by (default none), and to return (default all)"
+   "(rev-display), (rev-display '(priority 1000 2000)), (rev-display '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (rev-display '(tags \"mytag\" due \"2016-08-16\") 'name 'name 'priority)"
+
+   (nil (mapcar println (reverse (pass return)))) )
+
 (de license ()
+   "(license)"
+   "License/Copyright output"
+   "(license)"
+
    (nil (prinl "Picotask
 
 Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
@@ -180,9 +233,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")) )
 
-## Source output (AGPL compliance)
-## Usage: (source)
 (de source ()
+   "(source)"
+   "Source output (AGPL compliance)"
+   "(source)"
+
    (nil
       (prinl "****** picotask executable")
       (prinl)
@@ -194,105 +249,175 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")) )
       (prinl)
       (in "__LIBDIR__/libpicotask.l" (prinl (till NIL T))) ) )
 
-## Build help output
-## Usage: (gethelp)
 (de gethelp @
-   (with 'defs
-      (=: add "Taskname, [Priority, Tags, Due, Parent, Children, Blocks, Blockedby, Comment]")
-      (=: destroy "Tasknumber")
-      (=: modify "T/NIL=add/remove, Tasknumber, [FieldName, ...]")
-      (=: retrieve "TaskExternalSymbol")
-      (=: ind "[[FieldName, arg1/start, [arg2/end]], ...]")
-      (=: return-raw "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
-      (=: return "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
-      (=: display-raw "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
-      (=: display "'([[FieldName, arg1/start, [arg2/end]], ...]), [FieldName, ...]")
-      (=: license)
-      (=: source)
-      (=: help)
-      (=: status "Number Status")
-      (=: isdone "Number")
-      (=: isopen "Number")
-      (=: rename "Number Name")
-      (=: priority "Number Priority")
-      (=: tag "Number Tag")
-      (=: untag "Number Tag")
-      (=: comment "Number Comment")
-      (=: uncomment "Number")
-      (=: due "Number Due")
-      (=: undue "Number")
-      (=: parent "Number PNumber")
-      (=: unparent "Number")
-      (=: child "Number CNumber")
-      (=: unchild "Number CNumber")
-      (=: block "Number BNumber")
-      (=: unblock "Number BNumber")
-      (=: connectdb)
-      (mapcar '((X) (list X (get This X))) (or (rest) '(add destroy modify retrieve ind return-raw return display-raw display license source help status isdone isopen rename priority tag untag comment uncomment due undue parent unparent child unchild block unblock connectdb))) ) )
+   "(gethelp [FuncName, ...])"
+   "Build help output"
+   "(gethelp), (gethelp add modify)"
 
-## Print help output
-## Usage: (help)
+   (mapcar
+      '(
+         (X)
+         (make
+            (when (str? (cadr X))
+               (link (cadr X))
+               (when (str? (caddr X))
+                  (link (caddr X))
+                  (when (str? (cadddr X))
+                     (link (cadddr X)) ) ) ) ) )
+      (or
+         (rest)
+         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw display license source gethelp help status isdone isopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment connectdb) ) ) ) # ...webserve
+
 (de help @
-   (nil (mapcar println (pass gethelp))) )
+   "(help [FuncName, ...])"
+   "Print help output"
+   "(help), (help add modify)"
+
+   (nil
+      (mapcar
+         '(
+            (X)
+            (when X
+               (when (car X) (prinl "Usage:       " (car X)))
+               (when (cadr X) (prinl "Description: " (cadr X)))
+               (when (caddr X) (prinl "Example:     " (caddr X)))
+               (prinl) ) )
+         (pass gethelp) ) ) )
 
 #### PUBLIC WRAPPER FUNCTIONS
 
 (de status (Number Status)
+   "(status Number Status)"
+   "Get or set task-status"
+   "(status 3 \"OPEN\")"
+
    (get-or-set Number 'status Status) )
 
-(de setdone (Number)
+(de isdone (Number)
+   "(isdone Number)"
+   "Return whether a task is \"DONE\""
+   "(isdone 3)"
+
    (status Number "DONE") )
 
-(de setopen (Number)
+(de isopen (Number)
+   "(isopen Number)"
+   "Return whether a task is \"OPEN\""
+   "(isopen 3)"
+
    (status Number "OPEN") )
 
 (de rename (Number Name)
+   "(rename Number Name)"
+   "Rename a task"
+   "(rename 3 \"other task name\")"
+
    (get-or-set Number 'name Name) )
 
 (de priority (Number Priority)
+   "(priority Number Priority)"
+   "Change a task's priority"
+   "(priority 3 4000)"
+
    (get-or-set Number 'priority Priority) )
 
 (de tag (Number Tag)
+   "(tag Number Tag)"
+   "Report or change a task's tag(s)"
+   "(tag 3), (tag 3 \"work\") , (tag 3 '(\"work\", \"foreign\"))"
+
    (get-or-set Number 'tags Tag) )
 
 (de untag (Number Tag)
+   "(untag Number Tag)"
+   "Remove a task's tag(s)"
+   "(untag 3 \"work\")"
+
    (modify NIL Number 'tags Tag) )
 
 (de due (Number Due)
+   "(due Number Due)"
+   "Report or change a task's due-date"
+   "(due 3), (due 3 \"20161010\")"
+
    (get-or-set Number 'due Due) )
 
 (de undue (Number)
+   "(undue Number)"
+   "Remove a task's due-date"
+   "(undue 3)"
+
    (modify NIL Number 'due) )
 
 (de parent (Number PNumber)
+   "(parent Number PNumber)"
+   "Report or change a task's parent-task"
+   "(parent 3), (parent 3 4)"
+
    (get-or-set Number 'parent PNumber) )
 
 (de unparent (Number)
+   "(unparent Number)"
+   "Remove a task's parent-task"
+   "(unparent 3)"
+
    (modify NIL Number 'parent) )
 
 (de child (Number CNumber)
+   "(child Number CNumber)"
+   "Report or add a task's child-task(s)"
+   "(child 3), (child 3 4), (child 3 '(4 5))"
+
    (get-or-set Number 'children CNumber) )
 
 (de unchild (Number CNumber)
+   "(unchild Number CNumber)"
+   "Remove a task's child-task(s)"
+   "(unchild 3 4), (unchild 3 '(4 5))"
+
    (modify NIL Number 'children CNumber) )
 
 (de block (Number BNumber)
+   "(block Number BNumber)"
+   "Report or add a task's blockee(s)"
+   "(block 3), (block 3 4), (block 3 '(4 5))"
+
    (get-or-set Number 'blocks BNumber) )
 
 (de unblock (Number BNumber)
+   "(unblock Number BNumber)"
+   "Remove a task's blockee(s)"
+   "(unblock 3 4), (unblock 3 '(4 5))"
+
    (modify NIL Number 'blocks BNumber) )
 
 (de comment (Number Comment)
+   "(comment Number Comment)"
+   "Report or change a task's comment"
+   "(comment 3), (comment 3 \"this is a comment\")"
+
    (get-or-set Number 'comment Comment) )
 
 (de uncomment (Number)
+   "(uncomment Number)"
+   "Remove a task's comment"
+   "(uncomment 3)"
+
    (modify NIL Number 'comment) )
 
-#### FRONTEND FUNCTIONS
+#### PUBLIC FRONTEND FUNCTIONS
 
 (de connectdb ()
+   "(connectdb)"
+   "Connect to the configured task-database"
+   "(connectdb)"
+
    (pool *TaskDBFile) ) ## initial database (consider block size)
 
 #(de webserve ()
+#   "(webserve)"
+#   "Serve a web-interface"
+#   "(webserve)"
+#
 #   (connectdb)
 #   (server 8081 "!work") )
