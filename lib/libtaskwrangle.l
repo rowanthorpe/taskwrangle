@@ -218,7 +218,7 @@
 
 Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
 posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
-intended to develop extensively from there.
+has been developed extensively from there.
 
 Taskwrangle is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
