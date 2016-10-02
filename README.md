@@ -1,5 +1,5 @@
-Picotask
-========
+Taskwrangle
+===========
 
 Copyright/License
 -----------------
@@ -12,16 +12,16 @@ or the MIT license (I didn't receive a conclusive answer yet). Either way this
 usage is covered. I will add appropriate copyright-header for that content
 if/when I receive a clearer answer about that.
 
-Picotask is distributed under the terms of the [GNU Affero General Public
+Taskwrangle is distributed under the terms of the [GNU Affero General Public
 License](https://www.gnu.org/licenses/agpl-3.0.html) version 3 or greater.
 
 Installation
 ------------
 
-Copy `conf/picotask.l.template` to `conf/picotask.l` and edit the copied file to
-suit your needs, then run `./install.sh`. To toggle un/install-mode or customize
-installation locations use flags (see `./install.sh -h` for details) or for
-greater control edit `./install.sh` directly.
+Copy `conf/taskwrangle.l.template` to `conf/taskwrangle.l` and edit the copied
+file to suit your needs, then run `./install.sh`. To toggle un/install-mode or
+customize installation locations use flags (see `./install.sh -h` for details)
+or for greater control edit `./install.sh` directly.
 
 Rationale
 ---------

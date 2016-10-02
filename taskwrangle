@@ -4,22 +4,22 @@
 ##    posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
 ##    has been developed extensively from there.
 ##
-##    This file is part of Picotask.
+##    This file is part of Taskwrangle.
 ##
-##    Picotask is free software: you can redistribute it and/or modify
+##    Taskwrangle is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU Affero General Public License as published by
 ##    the Free Software Foundation, either version 3 of the License, or
 ##    (at your option) any later version.
 ##
-##    Picotask is distributed in the hope that it will be useful,
+##    Taskwrangle is distributed in the hope that it will be useful,
 ##    but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##    GNU Affero General Public License for more details.
 ##
 ##    You should have received a copy of the GNU Affero General Public License
-##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
+##    along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/picotask.l" "__LIBDIR__/libpicotask.l"'\'' -"symbols '\''picotask" -'\''connectdb'\'''
+cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/taskwrangle.l" "__LIBDIR__/libtaskwrangle.l"'\'' -"symbols '\''taskwrangle" -'\''connectdb'\'''
 terminal_width=${COLUMNS:-\$(stty size | cut -d' ' -f2 || printf '80')}
 
 choplonglines=0
@@ -46,7 +46,7 @@ ARGS:
  enclosing parentheses (like what is used for normal noninteractive use of
  picolisp). For example:
 
-picotask help
+taskwrangle help
 
  executes as:
 

@@ -4,20 +4,20 @@
 ##    posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
 ##    has been developed extensively from there.
 ##
-##    This file is part of Picotask.
+##    This file is part of Taskwrangle.
 ##
-##    Picotask is free software: you can redistribute it and/or modify
+##    Taskwrangle is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU Affero General Public License as published by
 ##    the Free Software Foundation, either version 3 of the License, or
 ##    (at your option) any later version.
 ##
-##    Picotask is distributed in the hope that it will be useful,
+##    Taskwrangle is distributed in the hope that it will be useful,
 ##    but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##    GNU Affero General Public License for more details.
 ##
 ##    You should have received a copy of the GNU Affero General Public License
-##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
+##    along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.
 
 set -e
 
@@ -52,7 +52,7 @@ Usage: ${_thisbase} [-u|-p|-c|-l|-e|-d]
  -c XX : set confdir to XX         (default: ${_confdir:-$(_derive_conf_dir)})
  -l XX : set libdir to XX          (default: ${_libdir:-${_prefix}}/lib)
  -e XX : set execdir to XX         (default: ${_execdir:-${_prefix}}/bin)
- -d XX : set docdir to XX          (default: ${_docdir:-${_prefix}}/share/doc/picotask)
+ -d XX : set docdir to XX          (default: ${_docdir:-${_prefix}}/share/doc/taskwrangle)
  -P XX : set picolisp prefix to XX (default: ${_pl_prefix})
 EOF
             exit 0
@@ -101,12 +101,12 @@ done
 test -n "${_confdir}" || _confdir="$(_derive_conf_dir)"
 test -n "${_libdir}" || _libdir="${_prefix}/lib"
 test -n "${_execdir}" || _execdir="${_prefix}/bin"
-test -n "${_docdir}" || _docdir="${_prefix}/share/doc/picotask"
+test -n "${_docdir}" || _docdir="${_prefix}/share/doc/taskwrangle"
 
 if test 1 -eq ${_uninstall}; then
-    rm -fv "${_confdir}/picotask.l"
-    rm -fv "${_libdir}/libpicotask.l"
-    rm -fv "${_execdir}/picotask"
+    rm -fv "${_confdir}/taskwrangle.l"
+    rm -fv "${_libdir}/libtaskwrangle.l"
+    rm -fv "${_execdir}/taskwrangle"
     rm -fv "${_docdir}/TODO"
     rm -fv "${_docdir}/README.md"
     rm -fv "${_docdir}/COPYING"
@@ -137,7 +137,7 @@ else
         chmod "${_chmod}" "${_dstpath}"
     }
     install -v -D -m u=rw,go=r -t "${_docdir}" "${_thisdir}/COPYING" "${_thisdir}/README.md" "${_thisdir}/TODO"
-    _install_sed "${_thisdir}/picotask" "${_execdir}/picotask" 'u=rwx,go=rx'
-    _install_sed "${_thisdir}/lib/libpicotask.l" "${_libdir}/libpicotask.l"
-    _install_sed "${_thisdir}/conf/picotask.l" "${_confdir}/picotask.l"
+    _install_sed "${_thisdir}/taskwrangle" "${_execdir}/taskwrangle" 'u=rwx,go=rx'
+    _install_sed "${_thisdir}/lib/libtaskwrangle.l" "${_libdir}/libtaskwrangle.l"
+    _install_sed "${_thisdir}/conf/taskwrangle.l" "${_confdir}/taskwrangle.l"
 fi

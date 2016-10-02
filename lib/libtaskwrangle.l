@@ -2,24 +2,24 @@
 ##    posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
 ##    has been developed extensively from there.
 ##
-##    This file is part of Picotask.
+##    This file is part of Taskwrangle.
 ##
-##    Picotask is free software: you can redistribute it and/or modify
+##    Taskwrangle is free software: you can redistribute it and/or modify
 ##    it under the terms of the GNU Affero General Public License as published by
 ##    the Free Software Foundation, either version 3 of the License, or
 ##    (at your option) any later version.
 ##
-##    Picotask is distributed in the hope that it will be useful,
+##    Taskwrangle is distributed in the hope that it will be useful,
 ##    but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##    GNU Affero General Public License for more details.
 ##
 ##    You should have received a copy of the GNU Affero General Public License
-##    along with Picotask.  If not, see <http://www.gnu.org/licenses/>.
+##    along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.
 
 (load "@lib/misc.l" "@lib/btree.l") # "@lib/debug.l" "@lib/pilog.l"
 
-(symbols 'picotask 'pico)
+(symbols 'taskwrangle 'pico)
 
 #### PRIVATE HELPER FUNCTIONS
 
@@ -214,24 +214,24 @@
    "License/Copyright output"
    "(license)"
 
-   (nil (prinl "Picotask
+   (nil (prinl "Taskwrangle
 
 Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
 posted by Joe Bognor at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
 intended to develop extensively from there.
 
-Picotask is free software: you can redistribute it and/or modify
+Taskwrangle is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-Picotask is distributed in the hope that it will be useful,
+Taskwrangle is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")) )
+along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
 
 (de source ()
    "(source)"
@@ -239,15 +239,15 @@ along with Picotask.  If not, see <http://www.gnu.org/licenses/>.")) )
    "(source)"
 
    (nil
-      (prinl "****** picotask executable")
+      (prinl "****** taskwrangle executable")
       (prinl)
-      (in "__EXECDIR__/picotask" (prinl (till NIL T)))
-      (prinl "****** picotask config")
+      (in "__EXECDIR__/taskwrangle" (prinl (till NIL T)))
+      (prinl "****** taskwrangle config")
       (prinl)
-      (in "__CONFDIR__/picotask.l" (prinl (till NIL T)))
-      (prinl "****** libpicolisp.l")
+      (in "__CONFDIR__/taskwrangle.l" (prinl (till NIL T)))
+      (prinl "****** libtaskwrangle.l")
       (prinl)
-      (in "__LIBDIR__/libpicotask.l" (prinl (till NIL T))) ) )
+      (in "__LIBDIR__/libtaskwrangle.l" (prinl (till NIL T))) ) )
 
 (de gethelp @
    "(gethelp [FuncName, ...])"
