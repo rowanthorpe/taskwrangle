@@ -114,13 +114,32 @@
                      (T (nil (prinl "Operation not allowed"))) ) ) ) )
          (collect 'number '+Task) ) ) )
 
-## Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying fields to return (default all)
-## Usage: (return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags "mytag" 'due "2016-08-16") 'name)
-(de return-raw (Crit . @)
-   (mapcar '((X) (pass retrieve X)) (apply ind Crit)) )
+## Sorts an index of tasks by a specified field
+## Usage: (dosort 'name '{2} '{4})
+## TODO: make SortField a list (SortFields), use first element as primary sort, next as secondary, etc.
+(de dosort (SortField Lst)
+   (if Sortfield
+      (by
+         (case SortField
+               (("number" "name" "priority" "tags" "parent" "comment") '((X) (get X SortField)))
+               (("children" "blocks" "blockedby") '((X) (length (get X SortField))))
+               ("due" '((X) ($dat (get X SortField)))) )
+         sort
+         Lst )
+      Lst ) ) #FIXME - then update callers below (and their help messages)
 
-## Returns all tasks matching criteria, expanding linked DB IDs, optionally specifying fields to return (default all)
-## Usage: (return), (return '(priority 1000 2000)), (return '(tags "mytag" 'due "2016-08-16") 'name)
+## Reverse-sorts an index of tasks by a specified field
+## Usage: (dorevsort 'name '{2} '{4})
+(de dorevsort @
+   (reverse (pass dosort)) )
+
+## Returns all tasks matching criteria, without expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
+## Usage: (return-raw), (return-raw '(priority 1000 2000)), (return-raw '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
+(de return-raw (Crit SortField . @)
+   (mapcar '((X) (pass retrieve X)) (dosort Sortfield (apply ind Crit))) )
+
+## Returns all tasks matching criteria, expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
+## Usage: (return), (return '(priority 1000 2000)), (return '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
 (de return @
    (mapcar '((Task)
              (mapcar '((TaskEntry)
@@ -129,13 +148,13 @@
                           (val-or-tasknum TaskEntry) ) ) Task ) )
       (pass return-raw) ) )
 
-## Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying fields to return (default all)
-## Usage: (display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags "mytag" 'due "2016-08-16") 'name)
+## Displays all tasks matching criteria, one per line, without expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
+## Usage: (display-raw), (display-raw '(priority 1000 2000)), (display-raw '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
 (de display-raw @
    (nil (mapcar println (pass return-raw))) )
 
-## Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying fields to return (default all)
-## Usage: (display), (display '(priority 1000 2000)), (display '(tags "mytag" 'due "2016-08-16") 'name)
+## Displays all tasks matching criteria, one per line, expanding linked DB IDs, optionally specifying field to sort by (default none), and to return (default all)
+## Usage: (display), (display '(priority 1000 2000)), (display '(tags "mytag" 'due "2016-08-16") 'name 'name 'priority)
 (de display @
    (nil (mapcar println (pass return))) )
 
