@@ -33,7 +33,7 @@
       (T (error "Status is not one of OPEN, DONE, ACTION, WAITFOR, DELEGATED")) ) )
 
 (de val-or-tasknum (Item)
-   (if (= (type Item) '(+Task))
+   (if (isa '+Task Item)
       (with Item (: number))
       Item ) )
 
