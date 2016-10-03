@@ -175,10 +175,11 @@
    "(return), (return '(priority 1000 2000)), (return '(tags \"mytag\" due \"2016-08-16\") 'name '(name priority)), (return '(tags \"mytag\" due \"2016-08-16\") '(name) 'name 'priority)"
 
    (mapcar '((Task)
-             (mapcar '((TaskEntry)
-                       (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
-                          (mapcar val-or-tasknum TaskEntry)
-                          (val-or-tasknum TaskEntry) ) ) Task ) )
+      (mapcar '((TaskEntry)
+         (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
+            (mapcar val-or-tasknum TaskEntry)
+            (val-or-tasknum TaskEntry) ))
+         Task ))
       (pass return-raw) ) )
 
 (de display-raw @
