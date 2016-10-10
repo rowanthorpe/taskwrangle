@@ -111,33 +111,32 @@
 (de ind @
    "(ind [[FieldName, arg1/start, [arg2/end], ...] | Equivalent-as-a-list])"
    "Returns an index of all tasks matching criteria"
-   "(ind), (ind 'priority 1000 2000), (ind 'tags \"mytag\" 'due \"2016-08-16\"), (ind '(tags \"mytag\" due \"2016-08-16\"))"
+   "(ind), (ind 'priority 1000 2000), (ind 'tags \"mytag\" 'due \"2016-08-16\"), (ind '(tags \"mytag\" 'due \"2016-08-16\"))"
 
-   (let (Args (if (lst? (arg 1)) (arg 1) (rest)))
-      (let (Var (pop 'Args) Val1 (pop 'Args))
-         (if (and Var Val1)
-            (case Var
-               (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
-                   (if Args
-                      (sect (collect Var '+Task Val1) (ind Args))
-                      (collect Var '+Task Val1) ) )
-               (T
-                  (let (Val2 (pop 'Args))
+   (sect
+      (let (Var (next))
+         (if (and Var (lst? Var))
+            (apply ind Var)
+            (let (Val1 (next) Val2 (if (index Var '("priority" "due" "notpriority" "notdue")) (next)))
+               (if (and Var Val1)
+                  (if (= "not" (pack (head 3 (chop Var))))
+                     (diff
+                        (collect 'number '+Task)
+                        (apply ind
+                           (list (intern (pack (tail -3 (chop Var)))) Val1 Val2) ) )
                      (case Var
+                        (("name" "status" "tags" "parent" "children" "blocks" "blockedby" "comment")
+                           (collect Var '+Task Val1) )
                         ("priority"
-                           (if Args
-                              (sect
-                                 (collect Var '+Task Val1 Val2)
-                                 (ind Args) )
-                              (collect Var '+Task Val1 (or Val2 Val1)) ) )
+                           (collect Var '+Task Val1 (or Val2 Val1)) )
                         ("due"
-                           (if Args
-                              (sect
-                                 (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep))
-                                 (ind Args) )
-                              (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) ) )
-                        (T (nil (prinl "Operation not allowed"))) ) ) ) )
-            (collect 'number '+Task) ) ) ) )
+                           (collect Var '+Task ($dat Val1 *DateSep) ($dat (or Val2 Val1) *DateSep)) )
+                        (T
+                           (nil (prinl "Operation not allowed")) ) ) )
+                  (collect 'number '+Task) ) ) ) )
+      (if (rest)
+         (apply ind (rest))
+         (collect 'number '+Task) ) ) )
 
 (de dosort (Objects SortFields)
    "(dosort Objects (list or symbol), [SortField(s) (list or symbol)])"
