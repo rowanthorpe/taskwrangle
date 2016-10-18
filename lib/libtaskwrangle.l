@@ -266,7 +266,7 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
                      (link (cadddr X)) ) ) ) ) )
       (or
          (rest)
-         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw display license source gethelp help status isdone isopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
+         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw display license source gethelp help status isdone isopen setdone setopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
 
 (de help @
    "(help [FuncName, ...])"
@@ -306,6 +306,20 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
    "(isopen 3)"
 
    (status Number "OPEN") )
+
+(de setdone (Number)
+   "(setdone Number)"
+   "Set a task as \"DONE\""
+   "(setdone 3)"
+
+   (modify T Number 'status "DONE") )
+
+(de setopen (Number)
+   "(setopen Number)"
+   "Set a task as \"OPEN\""
+   "(setdone 3)"
+
+   (modify T Number 'status "OPEN") )
 
 (de rename (Number Name)
    "(rename Number Name)"
