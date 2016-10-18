@@ -266,7 +266,7 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
                      (link (cadddr X)) ) ) ) ) )
       (or
          (rest)
-         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw display license source gethelp help status isdone isopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment connectdb) ) ) ) # ...webserve
+         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw display license source gethelp help status isdone isopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
 
 (de help @
    "(help [FuncName, ...])"
@@ -404,6 +404,13 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
    "(uncomment 3)"
 
    (modify NIL Number 'comment) )
+
+(de todo ()
+   "(todo)"
+   "Show all incomplete tasks in reverse-priority order"
+   "(todo)"
+
+   (rev-display '(notstatus "DONE") 'priority) )
 
 #### PUBLIC FRONTEND FUNCTIONS
 
