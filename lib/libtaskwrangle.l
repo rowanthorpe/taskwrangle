@@ -424,10 +424,11 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
    "Show all incomplete tasks (optionally matching specified tags) in reverse-priority order"
    "(todo), (todo 'work 'devel)"
 
-   (let (conds (append
-                  '(notstatus "DONE")
-                  (mapcar '((X) (list 'tags X)) (rest)) ) )
-      (rev-display conds 'priority) ) )
+   (rev-display
+      (append
+         '(notstatus "DONE")
+         (mapcar '((X) (list 'tags X)) (rest)) )
+      'priority ) )
 
 #### PUBLIC FRONTEND FUNCTIONS
 
