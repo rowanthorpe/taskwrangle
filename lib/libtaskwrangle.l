@@ -419,12 +419,15 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
 
    (modify NIL Number 'comment) )
 
-(de todo ()
-   "(todo)"
-   "Show all incomplete tasks in reverse-priority order"
-   "(todo)"
+(de todo @
+   "(todo [Tag, ...])"
+   "Show all incomplete tasks (optionally matching specified tags) in reverse-priority order"
+   "(todo), (todo 'work 'devel)"
 
-   (rev-display '(notstatus "DONE") 'priority) )
+   (let (conds (append
+                  '(notstatus "DONE")
+                  (mapcar '((X) (list 'tags X)) (rest)) ) )
+      (rev-display conds 'priority) ) )
 
 #### PUBLIC FRONTEND FUNCTIONS
 
