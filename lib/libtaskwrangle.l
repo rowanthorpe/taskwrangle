@@ -33,9 +33,11 @@
       (T (error "Status is not one of OPEN, DONE, ACTION, WAITFOR, DELEGATED")) ) )
 
 (de val-or-tasknum (Item)
-   (if (isa '+Task Item)
-      (with Item (: number))
-      Item ) )
+   (if (lst? Item)
+      (mapcar val-or-tasknum Item)
+      (if (isa '+Task Item)
+         (with Item (: number))
+         Item ) ) )
 
 (de get-or-set (Number Field Val)
    (if Val
