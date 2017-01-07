@@ -148,10 +148,12 @@
    (if SortFields
       (let (SortField (if (lst? SortFields) (car SortFields) SortFields))
          (by
-            (case SortField
-                  (("number" "name" "priority" "tags" "parent" "comment") '((X) (get X SortField)))
-                  (("children" "blocks" "blockedby") '((X) (length (get X SortField))))
-                  ("due" '((X) ($dat (get X SortField)))) )
+            '((X)
+              (let (Y (if (lst? X) (car X) X))
+                 (case SortField
+                    (("number" "name" "priority" "tags" "parent" "comment") (get Y SortField))
+                    (("children" "blocks" "blockedby") (length (get Y SortField)))
+                    ("due" ($dat (get Y SortField))) ) ) )
             sort
             Objects ) )
       Objects ) )
