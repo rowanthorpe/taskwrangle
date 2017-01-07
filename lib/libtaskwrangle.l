@@ -300,28 +300,28 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
    "Return whether a task is \"DONE\""
    "(isdone 3)"
 
-   (status Number "DONE") )
+   (= "DONE" (status Number)) )
 
 (de isopen (Number)
    "(isopen Number)"
    "Return whether a task is \"OPEN\""
    "(isopen 3)"
 
-   (status Number "OPEN") )
+   (= "OPEN" (status Number)) )
 
 (de setdone (Number)
    "(setdone Number)"
    "Set a task as \"DONE\""
    "(setdone 3)"
 
-   (modify T Number 'status "DONE") )
+   (status Number "DONE") )
 
 (de setopen (Number)
    "(setopen Number)"
    "Set a task as \"OPEN\""
-   "(setdone 3)"
+   "(setopen 3)"
 
-   (modify T Number 'status "OPEN") )
+   (status Number "OPEN") )
 
 (de rename (Number Name)
    "(rename Number Name)"
