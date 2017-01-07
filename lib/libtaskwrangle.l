@@ -260,14 +260,14 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
 
    (mapcar
       '(
-         (X)
-         (make
-            (when (str? (cadr X))
-               (link (cadr X))
-               (when (str? (caddr X))
-                  (link (caddr X))
-                  (when (str? (cadddr X))
-                     (link (cadddr X)) ) ) ) ) )
+        (X)
+        (make
+           (when (str? (cadr X))
+              (link (cadr X))
+              (when (str? (caddr X))
+                 (link (caddr X))
+                 (when (str? (cadddr X))
+                    (link (cadddr X)) ) ) ) ) )
       (or
          (rest)
          (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw rev-display-raw display rev-display license source gethelp help status isdone isopen setdone setopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
@@ -280,12 +280,12 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
    (nil
       (mapcar
          '(
-            (X)
-            (when X
-               (when (car X) (prinl "Usage:       " (car X)))
-               (when (cadr X) (prinl "Description: " (cadr X)))
-               (when (caddr X) (prinl "Example:     " (caddr X)))
-               (prinl) ) )
+           (X)
+           (when X
+              (when (car X) (prinl "Usage:       " (car X)))
+              (when (cadr X) (prinl "Description: " (cadr X)))
+              (when (caddr X) (prinl "Example:     " (caddr X)))
+              (prinl) ) )
          (pass gethelp) ) ) )
 
 #### PUBLIC WRAPPER FUNCTIONS
