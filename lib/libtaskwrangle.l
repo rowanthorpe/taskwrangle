@@ -99,13 +99,15 @@
 
    (mapcar
       '((Ob)
-         (mapcan
-            '((Field) (list (get Ob Field)))
-            (if RetFields
-               (if (lst? RetFields)
-                  RetFields
-                  (pass list RetFields) )
-               '(number name status priority tags due parent children blocks blockedby comment) ) ) )
+        (if (lst? Ob)
+           (apply retrieve (append (list Ob Retfields) (rest)))
+           (mapcan
+              '((Field) (list (get Ob Field)))
+              (if RetFields
+                 (if (lst? RetFields)
+                    RetFields
+                    (list RetFields) )
+                 '(number name status priority tags due parent children blocks blockedby comment) ) ) ) )
       (if (lst? Objects)
          Objects
          (list Objects) ) ) )
