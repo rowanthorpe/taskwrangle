@@ -19,7 +19,8 @@
 ##    You should have received a copy of the GNU Affero General Public License
 ##    along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.
 
-cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/taskwrangle.l" "__LIBDIR__/libtaskwrangle.l"'\'' -"symbols '\''taskwrangle" -'\''connectdb'\'''
+#NB: Still do (symbols 'taskwrangle 'pico) here as (load) auto reverts to (symbols 'pico) at end
+cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/taskwrangle.l" "__LIBDIR__/libtaskwrangle.l"'\'' -"symbols '\''taskwrangle '\''pico" -'\''connectdb'\'''
 terminal_width=${COLUMNS:-$(stty size | cut -d' ' -f2 || printf '80')}
 
 choplonglines=0
