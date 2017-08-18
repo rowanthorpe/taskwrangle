@@ -82,7 +82,7 @@
          ("status" (when (known-status (arg 2)) (put!> (db 'number '+Task Number) (arg 1) (arg 2))))
          (("name" "priority" "comment") (put!> (db 'number '+Task Number) (arg 1) (arg 2)))
          ("tags" (put!> (db 'number '+Task Number) (arg 1) (if (lst? (arg 2)) (append (get (db 'number '+Task Number) (arg 1)) (arg 2)) (arg 2))))
-         ("due" (let (Date ($dat (arg 2) *DateSep)) (if (= NIL Date) (error "Unrecognised due-date format") (put!> (db 'number '+Task Number) (arg 1) Date))))
+         ("due" (let (Date ($dat (arg 2) *DateSep)) (if (== NIL Date) (error "Unrecognised due-date format") (put!> (db 'number '+Task Number) (arg 1) Date))))
          ("parent" (put!> (db 'number '+Task Number) (arg 1) (db 'number '+Task (arg 2))))
          (("children" "blocks" "blockedby") (put!> (db 'number '+Task Number) (arg 1) (if (lst? (arg 2)) (append (get (db 'number '+Task Number) (arg 1)) (mapcar '((Y) (db 'number '+Task Y)) (arg 2))) (db 'number '+Task (arg 2)))))
          (T (nil (prinl "Operation not allowed"))) )
@@ -181,7 +181,7 @@
 
    (mapcar '((Task)
       (mapcar '((TaskEntry)
-         (if (and (not (= NIL TaskEntry)) (lst? TaskEntry))
+         (if (and (not (== NIL TaskEntry)) (lst? TaskEntry))
             (mapcar val-or-tasknum TaskEntry)
             (val-or-tasknum TaskEntry) ))
          Task ))
