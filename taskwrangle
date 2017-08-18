@@ -20,7 +20,7 @@
 ##    along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.
 
 cmdline='exec __PL_PREFIX__/bin/picolisp __PL_PREFIX__/lib/picolisp/lib.l -'\''load "__CONFDIR__/taskwrangle.l" "__LIBDIR__/libtaskwrangle.l"'\'' -"symbols '\''taskwrangle" -'\''connectdb'\'''
-terminal_width=${COLUMNS:-\$(stty size | cut -d' ' -f2 || printf '80')}
+terminal_width=${COLUMNS:-$(stty size | cut -d' ' -f2 || printf '80')}
 
 choplonglines=0
 dryrun=0
