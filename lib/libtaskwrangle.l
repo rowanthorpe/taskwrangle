@@ -1,6 +1,6 @@
-##    Copyright © 2016 Rowan Thorpe, initially based entirely on a "taskdb" demo-app
-##    posted by Joe Bogner at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
-##    has been developed extensively from there.
+##    Copyright © 2016-2017 Rowan Thorpe, initially based entirely on a "taskdb"
+##    demo-app posted by Joe Bogner at http://picolisp.com/wiki/?taskdb on
+##    24 August 2016, and has been developed extensively from there.
 ##
 ##    This file is part of Taskwrangle.
 ##
@@ -230,9 +230,9 @@
 
    (nil (prinl "Taskwrangle
 
-Copyright © 2016 Rowan Thorpe, initially based entirely on a \"taskdb\" demo-app
-posted by Joe Bogner at http://picolisp.com/wiki/?taskdb on 24 August 2016, and
-has been developed extensively from there.
+Copyright © 2016-2017 Rowan Thorpe, initially based entirely on a \"taskdb\"
+demo-app posted by Joe Bogner at http://picolisp.com/wiki/?taskdb on
+24 August 2016, and has been developed extensively from there.
 
 Taskwrangle is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

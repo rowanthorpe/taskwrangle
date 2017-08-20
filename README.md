@@ -34,8 +34,8 @@ I've uploaded it.
 Copyright/License
 -----------------
 
-Copyright © 2016 Rowan Thorpe. Initially based entirely on a `taskdb` demo-app
-posted by Joe Bogner at [the Picolisp wiki](http://picolisp.com/wiki/?taskdb)
+Copyright © 2016-2017 Rowan Thorpe. Initially based entirely on a `taskdb`
+demo-app posted by Joe Bogner at [the Picolisp wiki](http://picolisp.com/wiki/?taskdb)
 on 24 August 2016, and has been developed extensively from there. As best as I
 could ascertain by enquiring, that blog post either falls under Public Domain,
 or the MIT license (I didn't receive a conclusive answer yet). Either way this
