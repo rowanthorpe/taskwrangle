@@ -142,6 +142,14 @@
          (apply ind (rest))
          (collect 'number '+Task) ) ) )
 
+# TODO: use this with an accumulating "already used" list to avoid circular loops killing the retrieval
+(de exclude (Index . @)
+   "(exclude Tree (list), [ExcludeField(s) (list)])"
+   "Filters the specified external symbol(s) out of the specified tree"
+   "(exclude (ind) '{2} '{4})"
+
+   (filter '((X) (not (memq X (rest)))) Index) )
+
 (de dosort (Objects SortFields)
    "(dosort Objects (list or symbol), [SortField(s) (list or symbol)])"
    "Sorts an index of task(s) by specified field(s)"
@@ -272,7 +280,7 @@ along with Taskwrangle.  If not, see <http://www.gnu.org/licenses/>.")) )
                     (link (cadddr X)) ) ) ) ) )
       (or
          (rest)
-         (list add destroy modify retrieve ind dosort dorevsort return-raw return display-raw rev-display-raw display rev-display license source gethelp help status isdone isopen setdone setopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
+         (list add destroy modify retrieve ind exclude dosort dorevsort return-raw return display-raw rev-display-raw display rev-display license source gethelp help status isdone isopen setdone setopen rename priority tag untag due undue parent unparent child unchild block unblock comment uncomment todo connectdb) ) ) ) # ...webserve
 
 (de help @
    "(help [FuncName, ...])"
